@@ -45,9 +45,9 @@ class AuthRepositoryImp implements AuthRepository {
   }
 
   @override
-  Future<Either<AppFailure, Unit>> singout(
+  Future<Either<AppFailure, Unit>> signout(
       AuthenticationType authenticationType) async {
-    throw UnimplementedError();
+    return _auth(() => remoteDataSource.signout(authenticationType));
   }
 
   Future<Either<AppFailure, Unit>> _auth(AuthFucntion function) async {

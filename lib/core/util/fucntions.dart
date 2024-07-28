@@ -55,15 +55,7 @@ void showCustomAboutDialog(BuildContext context, String title, String content,
   );
 }
 
-void showSnackBar(BuildContext context, String content, Duration duration) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      duration: duration,
-      content: Text(content,
-          style: TextStyle(color: Theme.of(context).colorScheme.background))));
-}
-
-UserModel createOnlineFetchedUser({required UserModel user}) {
+UserModel createThemeUser({required UserModel user, required bool isDark}) {
   return UserModel(
       id: user.id,
       authenticationType: user.authenticationType,
@@ -79,8 +71,57 @@ UserModel createOnlineFetchedUser({required UserModel user}) {
       email: user.email,
       profilePictureUrl: user.profilePictureUrl,
       gender: user.gender,
+      isDarkMode: isDark,
+      phoneNumber: user.phoneNumber);
+}
+
+void showSnackBar(BuildContext context, String content, Duration duration) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      duration: duration,
+      content: Text(content,
+          style: TextStyle(color: Theme.of(context).colorScheme.background))));
+}
+
+UserModel createOnlineFetchedUser(
+    {required UserModel user, required String authType}) {
+  return UserModel(
+      id: user.id,
+      authenticationType: authType,
+      lastSeenTime: Timestamp.now(),
+      chatIds: user.chatIds,
+      userPostsIds: user.userPostsIds,
+      freindsIds: user.freindsIds,
+      savedPostsIds: user.savedPostsIds,
+      isOffline: false,
+      birthDate: user.birthDate,
+      userName: user.userName,
+      accountName: user.accountName,
+      email: user.email,
+      profilePictureUrl: user.profilePictureUrl,
+      gender: user.gender,
       isDarkMode: user.isDarkMode,
       phoneNumber: user.phoneNumber);
+}
+
+UserModel createNoAuthUser({required UserModel user}) {
+  return UserModel(
+      id: user.id,
+      isOffline: user.isOffline,
+      birthDate: user.birthDate,
+      lastSeenTime: user.lastSeenTime,
+      authenticationType: AuthenticationType.noAuth.type,
+      userName: user.userName,
+      accountName: user.accountName,
+      gender: user.gender,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePictureUrl: user.profilePictureUrl,
+      userPostsIds: user.userPostsIds,
+      savedPostsIds: user.savedPostsIds,
+      chatIds: user.chatIds,
+      freindsIds: user.freindsIds,
+      isDarkMode: user.isDarkMode);
 }
 
 UserModel createTemporarUser(

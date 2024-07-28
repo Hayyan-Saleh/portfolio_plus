@@ -55,7 +55,12 @@ class UserRepositoryImpl implements UserRepository {
       UserModel user = await localDataSource.fetchOfflineUser();
       return Right(user);
     } catch (e) {
-      return Left(OfflineFailure(failureMessage: EMPTY_CACHE_MESSAGE));
+      if (e.toString() ==
+          "type 'Null' is not a subtype of type 'UserModel' in type cast") {
+        return Left(OfflineFailure(failureMessage: EMPTY_CACHE_MESSAGE));
+      } else {
+        return Left(OfflineFailure(failureMessage: e.toString()));
+      }
     }
   }
 
@@ -66,8 +71,7 @@ class UserRepositoryImpl implements UserRepository {
       final user = await localDataSource.storeOfflineUser(userModel);
       return Right(user);
     } catch (e) {
-      return Left(
-          OfflineFailure(failureMessage: "CAN'T STORE DATA IN Cache Memory!"));
+      return Left(OfflineFailure(failureMessage: e.toString()));
     }
   }
 

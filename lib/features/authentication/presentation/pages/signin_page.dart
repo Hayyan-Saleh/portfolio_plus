@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/util/auth_enum.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
+import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/middle_point_page.dart';
@@ -42,8 +43,8 @@ class _SigninPageState extends State<SigninPage> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    return BlocProvider<AuthenticationBloc>(
-        create: (_) => widget.authenticationBloc,
+    return BlocProvider<AuthenticationBloc>.value(
+        value: widget.authenticationBloc,
         child: BlocListener<AuthenticationBloc, AuthenticationState>(
             listener: (context, state) async {
           if (state is SignedinAuthenticationState) {
@@ -96,9 +97,8 @@ class _SigninPageState extends State<SigninPage> {
             Widget widget = const Placeholder();
             if (state is LoadingAuthenticationState) {
               widget = Center(
-                child: CircularProgressIndicator(
-                    color: Theme.of(context).colorScheme.primary),
-              );
+                  child: LoadingWidget(
+                      color: Theme.of(context).colorScheme.secondary));
             } else {
               widget = _buildBody(height);
             }

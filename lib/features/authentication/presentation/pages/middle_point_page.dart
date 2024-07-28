@@ -12,7 +12,7 @@ import 'package:portfolio_plus/features/authentication/presentation/pages/fill_i
 import 'package:portfolio_plus/features/authentication/presentation/pages/home_page_test.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
 
-class MiddlePointPage extends StatelessWidget {
+class MiddlePointPage extends StatefulWidget {
   final UserModel userModel;
   final UserBloc userBloc;
   final AuthenticationBloc authBloc;
@@ -23,71 +23,78 @@ class MiddlePointPage extends StatelessWidget {
       required this.authBloc});
 
   @override
+  State<MiddlePointPage> createState() => _MiddlePointPageState();
+}
+
+class _MiddlePointPageState extends State<MiddlePointPage> {
+  final UserProfilePictureBloc userPorfilePictureBloc =
+      di.sl<UserProfilePictureBloc>();
+  final UserAccountNameBloc userAccountNameBloc = di.sl<UserAccountNameBloc>();
+  @override
   Widget build(BuildContext context) {
-    final UserProfilePictureBloc userPorfilePictureBloc =
-        di.sl<UserProfilePictureBloc>();
-    final UserAccountNameBloc userAccountNameBloc =
-        di.sl<UserAccountNameBloc>();
     return BlocProvider<UserBloc>.value(
-      value: userBloc..add(GetOnlineUserEvent(id: userModel.id)),
+      value: widget.userBloc..add(GetOnlineUserEvent(id: widget.userModel.id)),
       child: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
           if (state is LaodedOnlineUserState) {
-            if (state.user.accountName == '') {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => FillInfoPage(
-                          userAccountNameBloc: userAccountNameBloc,
-                          userProfilePictureBloc: userPorfilePictureBloc,
-                          userModel: state.user,
-                          authBloc: authBloc,
-                          userBloc: userBloc,
-                        )),
-                (route) => false,
-              );
-            } else {
-              userBloc.add(StoreOfflineUserEvent(
-                  user: createOnlineFetchedUser(user: state.user)));
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => HomePage(
-                          authBloc: authBloc,
-                          userBloc: userBloc,
-                        )),
-                (route) => false,
-              );
-            }
+            _handleLoadedUser(state.user);
           } else if (state is FailedUserState) {
             if (state.failure.failureMessage == NO_USER_ONLINE_FETCH_ERROR) {
-              userBloc.add(StoreOnlineUserEvent(user: userModel));
+              widget.userBloc.add(StoreOnlineUserEvent(user: widget.userModel));
+              _navigateToFillUserInfoPage(user: widget.userModel);
             } else {
               showCustomAboutDialog(context, "Data Fetching Error",
                   state.failure.failureMessage, null, true);
             }
           } else if (state is StoredOnlineUserState) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => FillInfoPage(
-                        userAccountNameBloc: userAccountNameBloc,
-                        userProfilePictureBloc: userPorfilePictureBloc,
-                        userModel: state.user,
-                        authBloc: authBloc,
-                        userBloc: userBloc,
-                      )),
-              (route) => false,
-            );
+            _navigateToFillUserInfoPage(user: state.user);
           }
         },
         builder: (context, state) {
           return Scaffold(
             appBar: buildAppBar(context),
-            body: const LoadingWidget(),
+            body: LoadingWidget(color: Theme.of(context).colorScheme.secondary),
           );
         },
       ),
+    );
+  }
+
+  void _handleLoadedUser(UserModel user) {
+    if (user.accountName == '') {
+      _navigateToFillUserInfoPage(user: user);
+    } else {
+      final UserModel authenticatedFetchedUser = createOnlineFetchedUser(
+          user: user, authType: widget.userModel.authenticationType);
+      widget.userBloc.add(StoreOnlineUserEvent(user: authenticatedFetchedUser));
+      widget.userBloc
+          .add(StoreOfflineUserEvent(user: authenticatedFetchedUser));
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => HomePage(
+                  user: authenticatedFetchedUser,
+                  authBloc: widget.authBloc,
+                  userBloc: widget.userBloc,
+                )),
+        (route) => false,
+      );
+    }
+  }
+
+  _navigateToFillUserInfoPage({required user}) {
+    return Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+          builder: (context) => FillInfoPage(
+                userAccountNameBloc: userAccountNameBloc,
+                userProfilePictureBloc: userPorfilePictureBloc,
+                userModel: createOnlineFetchedUser(
+                    user: user, authType: widget.userModel.authenticationType),
+                authBloc: widget.authBloc,
+                userBloc: widget.userBloc,
+              )),
+      (route) => false,
     );
   }
 }

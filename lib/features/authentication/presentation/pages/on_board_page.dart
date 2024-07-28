@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
@@ -78,29 +79,16 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     TextButton(
                         onPressed: () {
                           if (_index == 2) {
-                            Navigator.of(context)
-                                .pushReplacement(PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      SigninPage(
-                                          userBloc: di.sl<UserBloc>(),
-                                          authenticationBloc:
-                                              di.sl<AuthenticationBloc>()),
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
-                                const begin = Offset(1.0, 0.0);
-                                const end = Offset.zero;
-                                const curve = Curves.ease;
-
-                                var tween = Tween(begin: begin, end: end)
-                                    .chain(CurveTween(curve: curve));
-
-                                return SlideTransition(
-                                  position: animation.drive(tween),
-                                  child: child,
-                                );
-                              },
-                            ));
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              PageTransition(
+                                  type: PageTransitionType.rightToLeft,
+                                  child: SigninPage(
+                                      userBloc: di.sl<UserBloc>(),
+                                      authenticationBloc:
+                                          di.sl<AuthenticationBloc>())),
+                              (route) => false,
+                            );
                           }
 
                           _pageViewController.nextPage(

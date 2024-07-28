@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/errors/failures.dart';
 import 'package:portfolio_plus/core/util/auth_enum.dart';
+import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/auth_use_cases/send_password_reset_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/auth_use_cases/send_verification_email_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/auth_use_cases/signin_using_email_password_use_case.dart';
@@ -76,13 +78,14 @@ class AuthenticationBloc
         );
       } else if (event is SignoutAuthenticationEvent) {
         emit(LoadingAuthenticationState());
-        final either = await signout(event.authType);
+        final either =
+            await signout(_mapAuthType(event.user.authenticationType));
         either.fold(
           (failure) {
             emit(FailedAuthenticationState(failure: failure));
           },
           (_) {
-            emit(SignedoutAuthenticationState());
+            emit(SignedoutAuthenticationState(user: event.user));
           },
         );
       }
@@ -99,5 +102,17 @@ class AuthenticationBloc
         emit(SignedinAuthenticationState(authType: authType));
       },
     );
+  }
+
+  AuthenticationType _mapAuthType(String type) {
+    AuthenticationType authType = AuthenticationType.noAuth;
+    switch (type) {
+      case EMAIL_PASSWORD_AUTH_TYPE:
+        authType = AuthenticationType.emailPasswordAuth;
+        break;
+      case GOOGLE_AUTH_TYPE:
+        authType = AuthenticationType.googleAuth;
+    }
+    return authType;
   }
 }
