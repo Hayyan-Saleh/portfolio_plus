@@ -27,15 +27,14 @@ class _CustomDropDownButtonState extends State<CustomDropDownButton> {
         onTap: () {
           DropDownState(
             DropDown(
-              dropDownBackgroundColor:
-                  Theme.of(context).colorScheme.secondary.withAlpha(150),
+              dropDownBackgroundColor: Theme.of(context).colorScheme.background,
               isDismissible: true,
               bottomSheetTitle: Text(
                 widget.dropDownTitle,
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20.0,
-                    color: Theme.of(context).colorScheme.background),
+                    color: Theme.of(context).colorScheme.secondary),
               ),
               data: _generateSelectedListItems(),
               selectedItems: (List<dynamic> selectedItems) =>
@@ -49,13 +48,20 @@ class _CustomDropDownButtonState extends State<CustomDropDownButton> {
               borderRadius: BorderRadius.circular(5),
               border:
                   Border.all(color: Theme.of(context).colorScheme.secondary)),
-          child: Center(
-            child: Text(
-              widget.buttonTitle,
-              overflow: TextOverflow.fade,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.secondary, fontSize: 12),
-            ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Center(
+                  child: Text(
+                    widget.buttonTitle,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
           ),
         ));
   }

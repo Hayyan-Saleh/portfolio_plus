@@ -11,6 +11,6 @@ abstract class AuthRepository extends Equatable {
       String emailAddress, String password);
   Future<Either<AppFailure, Unit>> sendVerificationEmail();
   Future<Either<AppFailure, Unit>> sendPasswordReset(String email);
-  Future<Either<AppFailure, Unit>> singout(
+  Future<Either<AppFailure, Unit>> signout(
       AuthenticationType authenticationType);
 }

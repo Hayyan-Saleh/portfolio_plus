@@ -115,7 +115,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     switch (authenticationType) {
       case AuthenticationType.googleAuth:
         GoogleSignIn googleSignIn = GoogleSignIn();
-        await googleSignIn.disconnect();
+        await googleSignIn.signOut();
         break;
       case AuthenticationType.emailPasswordAuth:
         await FirebaseAuth.instance.signOut();

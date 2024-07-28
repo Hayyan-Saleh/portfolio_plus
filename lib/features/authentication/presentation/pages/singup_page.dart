@@ -177,7 +177,9 @@ class _SignupPageState extends State<SignupPage> {
           child: CustomAuthButton(
               icon: Icons.lock_outlined,
               child: isLoading
-                  ? const LoadingWidget()
+                  ? LoadingWidget(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    )
                   : Text('Sign up with password',
                       textAlign: TextAlign.center,
                       style: TextStyle(

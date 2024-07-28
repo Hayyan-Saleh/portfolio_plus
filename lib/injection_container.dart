@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:portfolio_plus/core/network_info/network_info.dart';
+import 'package:portfolio_plus/core/util/timestamp_adapter.dart';
 import 'package:portfolio_plus/features/authentication/data/data_sources/auth_remote_data_source.dart';
 import 'package:portfolio_plus/features/authentication/data/data_sources/user_local_data_source.dart';
 import 'package:portfolio_plus/features/authentication/data/data_sources/user_remote_data_source.dart';
@@ -82,8 +83,9 @@ Future<void> init() async {
       () => AuthRepositoryImp(networkInfo: sl(), remoteDataSource: sl()));
 
   //*data_sources
-  Box userBox = await Hive.openBox('USER');
+  Hive.registerAdapter(TimestampAdapter());
   Hive.registerAdapter(UserModelAdapter());
+  Box userBox = await Hive.openBox('USER');
   sl.registerLazySingleton<UserLocalDataSource>(
       () => UserLocalDataSourceImpl(userBox: userBox));
   sl.registerLazySingleton<UserRemoteDataSource>(

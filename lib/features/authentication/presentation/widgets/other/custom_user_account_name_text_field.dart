@@ -84,7 +84,9 @@ class _CustomUserAccountNameTextFieldState
   }
 
   Widget _buildIcon(bool status) {
-    return Icon(status ? Icons.done : Icons.error_outline_outlined,
-        color: status ? Colors.green : Colors.red);
+    return widget.textEditingController.text == ''
+        ? const Icon(Icons.error_outline_outlined, color: Colors.red)
+        : Icon(status ? Icons.done : Icons.error_outline_outlined,
+            color: status ? Colors.green : Colors.red);
   }
 }

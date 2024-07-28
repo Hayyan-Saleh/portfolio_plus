@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/constants/maps.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/util/gender_enum.dart';
+import 'package:portfolio_plus/core/widgets/custom_cached_network_image.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
@@ -13,6 +15,7 @@ import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bl
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/home_page_test.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/custom_user_account_name_text_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/drop_down_button.dart';
@@ -40,9 +43,12 @@ class FillInfoPage extends StatefulWidget {
 }
 
 class _FillInfoPageState extends State<FillInfoPage> {
+  final GlobalKey<FormState> userNameFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> accountNameFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> phoneNumberFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> userEmailFormKey = GlobalKey<FormState>();
+  final TextEditingController userNameEditingController =
+      TextEditingController();
   final TextEditingController accountNameEditingController =
       TextEditingController();
   final TextEditingController phoneNumberEditingController =
@@ -50,6 +56,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
   final TextEditingController userEmailEditingController =
       TextEditingController();
 
+  String? imageDownloadLink;
   String? selectedGender;
   Timestamp? birthDate;
   String? countryCode;
@@ -63,14 +70,18 @@ class _FillInfoPageState extends State<FillInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserBloc>(
-      create: (context) => widget.userBloc,
+    return BlocProvider<UserBloc>.value(
+      value: widget.userBloc,
       child: BlocBuilder<UserBloc, UserState>(
         builder: (context, state) {
           double height = MediaQuery.of(context).size.height;
           double width = MediaQuery.of(context).size.width;
-          Widget stateWidget = const LoadingWidget();
+          Widget stateWidget =
+              LoadingWidget(color: Theme.of(context).colorScheme.secondary);
           if (state is LaodedOnlineUserState) {
+            stateWidget = _buildBody(context, state.user, height, width,
+                widget.userProfilePictureBloc);
+          } else if (state is StoredOnlineUserState) {
             stateWidget = _buildBody(context, state.user, height, width,
                 widget.userProfilePictureBloc);
           } else if (state is FailedUserState) {
@@ -109,12 +120,28 @@ class _FillInfoPageState extends State<FillInfoPage> {
           padding: EdgeInsets.symmetric(vertical: 0.03 * height),
           child: CustomSeperator(height: 0.004 * height, width: 0.3 * width),
         ),
+        _buildHeadingText2(context, "Enter your user name", false, false),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 0.01 * height),
+          child: CustomTextFormField(
+              formkey: userNameFormKey,
+              obsecure: false,
+              textEditingController: userNameEditingController,
+              errorMessage: "Please enter your real name here",
+              hintText: ""),
+        ),
         _buildHeadingText2(context, "Enter your account name", false, false),
+        SizedBox(
+          height: 0.01 * height,
+        ),
         CustomUserAccountNameTextField(
             userAccountNameBloc: widget.userAccountNameBloc,
             hintText: "example: user_name_1023",
             formKey: accountNameFormKey,
             textEditingController: accountNameEditingController),
+        SizedBox(
+          height: 0.005 * height,
+        ),
         _buildDetailsText(context, "The account name must be unique", 12),
         SizedBox(
           height: 0.01 * height,
@@ -156,12 +183,12 @@ class _FillInfoPageState extends State<FillInfoPage> {
             children: [
               SizedBox(
                 height: 0.06 * height,
-                width: 0.2 * width,
+                width: 0.25 * width,
                 child: CustomDropDownButton(
                   dropDownTitle: "Choose your country code",
                   buttonTitle: countryCode == null
                       ? "Country code"
-                      : countryCodeMap[countryCode]!,
+                      : '+ ${countryCodeMap[countryCode]!}',
                   dataList: countryCodeMap.keys.toList(),
                   onSelect: (List<dynamic> selectedList) {
                     for (var item in selectedList) {
@@ -197,6 +224,9 @@ class _FillInfoPageState extends State<FillInfoPage> {
               children: [
                 _buildHeadingText2(
                     context, "Enter your contact email ", true, false),
+                SizedBox(
+                  height: 0.01 * height,
+                ),
                 CustomTextFormField(
                     formkey: userEmailFormKey,
                     obsecure: false,
@@ -214,7 +244,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
           padding: EdgeInsets.only(bottom: 0.02 * height),
           child: CustomAuthButton(
               icon: Icons.keyboard_double_arrow_right_outlined,
-              onTap: () {},
+              onTap: () => _goToHomeScreenOnTap(),
               child: Text(
                 "Go To Home Screen",
                 style: TextStyle(
@@ -248,7 +278,8 @@ class _FillInfoPageState extends State<FillInfoPage> {
                 "(optional)",
                 overflow: TextOverflow.clip,
                 style: TextStyle(
-                    fontSize: 14, color: Theme.of(context).colorScheme.primary),
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.secondary),
               )
             : const SizedBox()
       ],
@@ -272,7 +303,8 @@ class _FillInfoPageState extends State<FillInfoPage> {
           bool clickable = true;
           Widget stateWidget = CircleAvatar(
               radius: 0.1 * height,
-              backgroundColor: Colors.grey,
+              backgroundColor:
+                  Theme.of(context).colorScheme.onPrimary.withAlpha(150),
               child: Icon(
                 Icons.add_a_photo_outlined,
                 size: 0.07 * height,
@@ -282,19 +314,16 @@ class _FillInfoPageState extends State<FillInfoPage> {
             clickable = false;
             stateWidget = CircleAvatar(
               radius: 0.1 * height,
-              backgroundColor: Colors.grey,
+              backgroundColor: Theme.of(context).colorScheme.onPrimary,
               child: CircularProgressIndicator(
                 color: Theme.of(context).colorScheme.background,
               ),
             );
           } else if (state is LoadedUserProfilePhotoState) {
             clickable = false;
-            stateWidget = CircleAvatar(
-                radius: 0.1 * height,
-                backgroundColor: Colors.grey,
-                foregroundImage: NetworkImage(
-                  state.downloadLink,
-                ));
+            imageDownloadLink = state.downloadLink;
+            stateWidget = CustomCachedNetworkImage(
+                isRounded: true, height: height, imageUrl: state.downloadLink);
           } else if (state is FailedLoadingPictureState) {
             clickable = true;
             showCustomAboutDialog(
@@ -325,12 +354,13 @@ class _FillInfoPageState extends State<FillInfoPage> {
   Widget _buildChooseGenderWidget(BuildContext context) {
     final List genders = Gender.values.map<String>((e) => e.name).toList();
     return PopupMenuButton(
-      color: Theme.of(context).colorScheme.background,
+      color: Theme.of(context).colorScheme.secondary,
       onSelected: (value) {
         setState(() {
           selectedGender = genders[value];
         });
       },
+      shadowColor: Theme.of(context).colorScheme.onSecondary,
       itemBuilder: (context) {
         return <PopupMenuItem>[
           ...List.generate(
@@ -341,49 +371,101 @@ class _FillInfoPageState extends State<FillInfoPage> {
                       genders.elementAt(index),
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.secondary),
+                          color: Theme.of(context).colorScheme.onSecondary),
                     ),
                   ))
         ];
       },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Text(selectedGender ?? "Select",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Theme.of(context).colorScheme.secondary)),
-          Icon(Icons.arrow_drop_down_sharp,
-              color: Theme.of(context).colorScheme.secondary)
-        ],
+      iconColor: Theme.of(context).colorScheme.onSecondary,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Theme.of(context).colorScheme.secondary),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(selectedGender ?? "Select",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSecondary)),
+              Icon(Icons.arrow_drop_down_sharp,
+                  color: Theme.of(context).colorScheme.onSecondary)
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildChooseBirthDateButton(BuildContext context) {
     return MaterialButton(
-        onPressed: () {
-          showDatePicker(
-            context: context,
-            firstDate: DateTime(1980),
-            lastDate: DateTime(2020),
-          ).then((value) {
-            setState(() {
-              birthDate = dateTimeToTimestamp(value!);
-            });
+      onPressed: () {
+        showDatePicker(
+          context: context,
+          firstDate: DateTime(1980),
+          lastDate: DateTime(2020),
+        ).then((value) {
+          setState(() {
+            birthDate = dateTimeToTimestamp(value!);
           });
-        },
-        child: Row(
-          children: [
-            Text("Choose",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.secondary)),
-            Icon(Icons.date_range,
-                color: Theme.of(context).colorScheme.secondary)
-          ],
-        ));
+        });
+      },
+      color: Theme.of(context).colorScheme.secondary,
+      child: Text("Choose",
+          style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSecondary)),
+    );
+  }
+
+  void _goToHomeScreenOnTap() {
+    if (userNameFormKey.currentState!.validate() &&
+        accountNameFormKey.currentState!.validate() &&
+        selectedGender != null &&
+        birthDate != null &&
+        countryCode != null &&
+        phoneNumberFormKey.currentState!.validate()) {
+      final createdUser = _createFilledInfoUser();
+      widget.userBloc.add(StoreOnlineUserEvent(user: createdUser));
+      Navigator.pushAndRemoveUntil(
+        context,
+        PageTransition(
+          type: PageTransitionType.fade,
+          child: HomePage(
+              userBloc: widget.userBloc,
+              authBloc: widget.authBloc,
+              user: createdUser),
+        ),
+        (route) => false,
+      );
+    } else {
+      showCustomAboutDialog(context, "Error",
+          "Please fill all the required data in order to continue", null, true);
+    }
+  }
+
+  UserModel _createFilledInfoUser() {
+    return UserModel(
+        accountName: accountNameEditingController.text.trim(),
+        authenticationType: widget.userModel.authenticationType,
+        birthDate: birthDate,
+        chatIds: [],
+        email: userEmailEditingController.text.trim(),
+        freindsIds: [],
+        gender: selectedGender,
+        id: widget.userModel.id,
+        isDarkMode: widget.userModel.isDarkMode,
+        isOffline: false,
+        lastSeenTime: Timestamp.now(),
+        phoneNumber:
+            "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
+        profilePictureUrl: imageDownloadLink,
+        savedPostsIds: [],
+        userName: userNameEditingController.text.trim(),
+        userPostsIds: []);
   }
 }

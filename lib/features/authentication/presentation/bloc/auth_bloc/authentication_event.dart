@@ -40,9 +40,9 @@ class SendPasswordResetEmailAuthenticationEvent extends AuthenticationEvent {
 class SendVerificationEmailAuthenticationEvent extends AuthenticationEvent {}
 
 class SignoutAuthenticationEvent extends AuthenticationEvent {
-  final AuthenticationType authType;
+  final UserModel user;
 
-  const SignoutAuthenticationEvent({required this.authType});
+  const SignoutAuthenticationEvent({required this.user});
   @override
-  List<Object> get props => [authType];
+  List<Object> get props => [user];
 }

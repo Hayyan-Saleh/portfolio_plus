@@ -9,7 +9,13 @@ sealed class AuthenticationState extends Equatable {
 
 class AuthenticationInitial extends AuthenticationState {}
 
-class SignedoutAuthenticationState extends AuthenticationState {}
+class SignedoutAuthenticationState extends AuthenticationState {
+  final UserModel user;
+
+  const SignedoutAuthenticationState({required this.user});
+  @override
+  List<Object> get props => [user];
+}
 
 class SignedupAuthenticationState extends AuthenticationState {}
 

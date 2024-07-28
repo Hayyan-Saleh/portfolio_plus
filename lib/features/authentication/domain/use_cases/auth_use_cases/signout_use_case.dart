@@ -11,7 +11,7 @@ class SignoutUseCase extends Equatable {
 
   Future<Either<AppFailure, Unit>> call(
       AuthenticationType authenticationType) async {
-    return await authRepository.singout(authenticationType);
+    return await authRepository.signout(authenticationType);
   }
 
   @override
