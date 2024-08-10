@@ -1,9 +1,12 @@
-import 'dart:io';
-
+import 'dart:io'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:portfolio_plus/core/constants/maps.dart';
+import 'package:portfolio_plus/core/errors/errors.dart';
+ 
 import 'package:portfolio_plus/core/util/auth_enum.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 
@@ -12,7 +15,7 @@ Future<File?> getImage() async {
   final ImagePicker picker = ImagePicker();
   final XFile? image =
       await picker.pickImage(source: ImageSource.gallery); //pic from gallery
-  // final XFile? photo = await picker.pickImage(source: ImageSource.camera);//pic from camera
+ 
   if (image != null) {
     file = File(image.path);
   }
@@ -54,15 +57,48 @@ void showCustomAboutDialog(BuildContext context, String title, String content,
     },
   );
 }
+ 
+Future<String> getId() async {
+  if (FirebaseAuth.instance.currentUser != null) {
+    return FirebaseAuth.instance.currentUser!.uid;
+  } else {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+    if (googleAuth != null) {
+      return googleAuth.idToken!;
+    } else {
+      throw OnlineException(message: "Error geting signed in google uid");
+    }
+  }
+}
 
+String getPhoneNumber(String number) {
+  int index = number.lastIndexOf(RegExp(" "));
+  String phoneNumber = number.substring(index + 1);
+  return phoneNumber;
+}
+
+String getCountryCode(String number) {
+  int index = number.lastIndexOf(RegExp(" "));
+  String countryCode = number.substring(2, index);
+  countryCodeMap.forEach((key, value) {
+    if (value == countryCode) {
+      countryCode = key;
+    }
+  });
+  return countryCode;
+}
+ 
 UserModel createThemeUser({required UserModel user, required bool isDark}) {
   return UserModel(
       id: user.id,
       authenticationType: user.authenticationType,
       lastSeenTime: Timestamp.now(),
       chatIds: user.chatIds,
-      userPostsIds: user.userPostsIds,
-      freindsIds: user.freindsIds,
+      userPostsIds: user.userPostsIds, 
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
       savedPostsIds: user.savedPostsIds,
       isOffline: false,
       birthDate: user.birthDate,
@@ -90,8 +126,10 @@ UserModel createOnlineFetchedUser(
       authenticationType: authType,
       lastSeenTime: Timestamp.now(),
       chatIds: user.chatIds,
-      userPostsIds: user.userPostsIds,
-      freindsIds: user.freindsIds,
+      userPostsIds: user.userPostsIds, 
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+ 
       savedPostsIds: user.savedPostsIds,
       isOffline: false,
       birthDate: user.birthDate,
@@ -104,12 +142,54 @@ UserModel createOnlineFetchedUser(
       phoneNumber: user.phoneNumber);
 }
 
+UserModel createOpenedAppUser({required UserModel user}) {
+  return UserModel(
+      id: user.id,
+      isOffline: false,
+      birthDate: user.birthDate,
+      lastSeenTime: Timestamp.now(),
+      authenticationType: user.authenticationType,
+      userName: user.userName,
+      accountName: user.accountName,
+      gender: user.gender,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePictureUrl: user.profilePictureUrl,
+      userPostsIds: user.userPostsIds,
+      savedPostsIds: user.savedPostsIds,
+      chatIds: user.chatIds,
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+      isDarkMode: user.isDarkMode);
+}
+
+UserModel createClosedAppUser({required UserModel user}) {
+  return UserModel(
+      id: user.id,
+      isOffline: true,
+      birthDate: user.birthDate,
+      lastSeenTime: Timestamp.now(),
+      authenticationType: user.authenticationType,
+      userName: user.userName,
+      accountName: user.accountName,
+      gender: user.gender,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePictureUrl: user.profilePictureUrl,
+      userPostsIds: user.userPostsIds,
+      savedPostsIds: user.savedPostsIds,
+      chatIds: user.chatIds,
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+      isDarkMode: user.isDarkMode);
+}
+
 UserModel createNoAuthUser({required UserModel user}) {
   return UserModel(
       id: user.id,
-      isOffline: user.isOffline,
+      isOffline: true,
       birthDate: user.birthDate,
-      lastSeenTime: user.lastSeenTime,
+      lastSeenTime: Timestamp.now(),
       authenticationType: AuthenticationType.noAuth.type,
       userName: user.userName,
       accountName: user.accountName,
@@ -120,7 +200,8 @@ UserModel createNoAuthUser({required UserModel user}) {
       userPostsIds: user.userPostsIds,
       savedPostsIds: user.savedPostsIds,
       chatIds: user.chatIds,
-      freindsIds: user.freindsIds,
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
       isDarkMode: user.isDarkMode);
 }
 
@@ -132,7 +213,8 @@ UserModel createTemporarUser(
       lastSeenTime: Timestamp.now(),
       chatIds: const [],
       userPostsIds: const [],
-      freindsIds: const [],
+      followersIds: [],
+      followingIds: [],
       savedPostsIds: const [],
       isOffline: false,
       birthDate: Timestamp.now(),

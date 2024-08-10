@@ -18,9 +18,9 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
     };
     return UserModel(
       id: fields[0] as String,
-      isOffline: fields[13] as bool?,
-      birthDate: fields[14] as Timestamp?,
-      lastSeenTime: fields[15] as Timestamp,
+      isOffline: fields[12] as bool?,
+      birthDate: fields[13] as Timestamp?,
+      lastSeenTime: fields[14] as Timestamp,
       authenticationType: fields[1] as String,
       userName: fields[2] as String?,
       accountName: fields[3] as String?,
@@ -31,15 +31,16 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       userPostsIds: (fields[8] as List).cast<String>(),
       savedPostsIds: (fields[9] as List).cast<String>(),
       chatIds: (fields[10] as List).cast<String>(),
-      freindsIds: (fields[11] as List).cast<String>(),
-      isDarkMode: fields[12] as bool?,
+      followersIds: (fields[15] as List).cast<String>(),
+      followingIds: (fields[16] as List).cast<String>(),
+      isDarkMode: fields[11] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(17)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -63,15 +64,17 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(10)
       ..write(obj.chatIds)
       ..writeByte(11)
-      ..write(obj.freindsIds)
-      ..writeByte(12)
       ..write(obj.isDarkMode)
-      ..writeByte(13)
+      ..writeByte(12)
       ..write(obj.isOffline)
-      ..writeByte(14)
+      ..writeByte(13)
       ..write(obj.birthDate)
+      ..writeByte(14)
+      ..write(obj.lastSeenTime)
       ..writeByte(15)
-      ..write(obj.lastSeenTime);
+      ..write(obj.followersIds)
+      ..writeByte(16)
+      ..write(obj.followingIds);
   }
 
   @override

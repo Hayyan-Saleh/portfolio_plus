@@ -5,8 +5,11 @@ import 'package:portfolio_plus/features/authentication/data/models/user_model.da
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/change_user_data_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/fetch_offline_user_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/fetch_online_user_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/follow_user_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/get_users_by_ids_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/store_offline_user_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/store_online_user_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/unfollow_user_use_case.dart';
 
 part 'user_event.dart';
 part 'user_state.dart';
@@ -17,13 +20,19 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   final FetchOnlineUserUseCase fetchOnlineUser;
   final StoreOfflineUserUseCase storeOfflineUser;
   final StoreOnlineUserUseCase storeOnlineUser;
-  UserBloc(
-      {required this.changeUserData,
-      required this.fetchOfflineUser,
-      required this.fetchOnlineUser,
-      required this.storeOfflineUser,
-      required this.storeOnlineUser})
-      : super(UserInitial()) {
+  final FollowUserUseCase followUser;
+  final UnFollowUserUseCase unFollowUser;
+  final GetUsersByIdsUseCase getUsersByIds;
+  UserBloc({
+    required this.changeUserData,
+    required this.fetchOfflineUser,
+    required this.fetchOnlineUser,
+    required this.storeOfflineUser,
+    required this.storeOnlineUser,
+    required this.followUser,
+    required this.unFollowUser,
+    required this.getUsersByIds,
+  }) : super(UserInitial()) {
     on<UserEvent>((event, emit) async {
       if (event is GetOfflineUserEvent) {
         emit(LoadingUserState());
@@ -80,6 +89,38 @@ class UserBloc extends Bloc<UserEvent, UserState> {
             emit(ChangedUserDataState(user: user));
           },
         );
+      } else if (event is FollowUserEvent) {
+        emit(LoadingFollowingUserState());
+        final either = await followUser(event.id);
+        either.fold(
+          (failure) {
+            emit(FailedUserState(failure: failure));
+          },
+          (followedUser) {
+            emit(FollowedUserState(followedUser: followedUser));
+          },
+        );
+      } else if (event is UnfollowUserEvent) {
+        emit(LoadingFollowingUserState());
+        final either = await unFollowUser(event.id);
+        either.fold(
+          (failure) {
+            emit(FailedUserState(failure: failure));
+          },
+          (unfollowedUser) {
+            emit(UnFollowedUserState(unfollowedUser: unfollowedUser));
+          },
+        );
+      } else if (event is FetchFollowingUserEvent) {
+        emit(LoadingFetchingOnlineUsersEvent());
+        final either = await getUsersByIds(event.ids);
+        either.fold((failure) => emit(FailedUserState(failure: failure)),
+            (users) => emit(LoadedFollowingUserState(users: users)));
+      } else if (event is FetchFollowersUserEvent) {
+        emit(LoadingFetchingOnlineUsersEvent());
+        final either = await getUsersByIds(event.ids);
+        either.fold((failure) => emit(FailedUserState(failure: failure)),
+            (users) => emit(LoadedFollowersUserState(users: users)));
       }
     });
   }

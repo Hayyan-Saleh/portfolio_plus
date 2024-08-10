@@ -10,7 +10,7 @@ sealed class UserState extends Equatable {
 final class UserInitial extends UserState {}
 
 class LoadingUserState extends UserState {}
-
+class LoadingFollowingUserState extends UserState {}
 class LaodedOfflineUserState extends UserState {
   final UserModel user;
 
@@ -57,4 +57,38 @@ class FailedUserState extends UserState {
   const FailedUserState({required this.failure});
   @override
   List<Object> get props => [failure];
+}
+
+class FollowedUserState extends UserState {
+  final UserModel followedUser;
+
+  const FollowedUserState({required this.followedUser});
+  @override
+  List<Object> get props => [followedUser];
+}
+
+class UnFollowedUserState extends UserState {
+  final UserModel unfollowedUser;
+
+  const UnFollowedUserState({required this.unfollowedUser});
+  @override
+  List<Object> get props => [unfollowedUser];
+}
+
+class LoadingFetchingOnlineUsersEvent extends UserState {}
+
+class LoadedFollowingUserState extends UserState {
+  final List<UserModel> users;
+
+  const LoadedFollowingUserState({required this.users});
+  @override
+  List<Object> get props => [users];
+}
+
+class LoadedFollowersUserState extends UserState {
+  final List<UserModel> users;
+
+  const LoadedFollowersUserState({required this.users});
+  @override
+  List<Object> get props => [users];
 }
