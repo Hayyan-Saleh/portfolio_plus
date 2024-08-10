@@ -3,7 +3,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/pages/signin_page.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/auth_pages/signin_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/on_board_widgets/first_onboard_widget.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/on_board_widgets/third_onboard_widget.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/on_board_widgets/second_onboard_widget.dart';

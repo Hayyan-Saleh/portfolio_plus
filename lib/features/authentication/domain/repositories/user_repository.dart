@@ -11,7 +11,11 @@ abstract class UserRepository extends Equatable {
   Future<Either<AppFailure, String>> storeProfilePhoto(
       String userId, File file);
   Future<Either<AppFailure, bool>> checkUserAccountName(String accountName);
+  Future<Either<AppFailure, UserModel>> followUser(String id);
+  Future<Either<AppFailure, UserModel>> unFollowUser(String id);
   Future<Either<AppFailure, UserModel>> fetchOfflineUser();
   Future<Either<AppFailure, UserModel>> fetchOnlineUser(String userId);
   Future<Either<AppFailure, UserModel>> changeUserData(UserModel user);
+  Future<Either<AppFailure, List<UserModel>>> getSearchedUsers(String name);
+  Future<Either<AppFailure, List<UserModel>>> getUsersByIds(List<String> ids);
 }

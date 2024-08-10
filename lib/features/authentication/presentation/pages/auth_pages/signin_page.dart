@@ -7,14 +7,14 @@ import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/pages/middle_point_page.dart';
-import 'package:portfolio_plus/features/authentication/presentation/pages/singup_page.dart';
-import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_auth_button.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/auth_pages/middle_point_page.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/auth_pages/singup_page.dart';
+import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_button.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_text_form_field.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
 
-import '../../../../core/errors/failures.dart';
-import '../../../../core/util/fucntions.dart';
+import '../../../../../core/errors/failures.dart';
+import '../../../../../core/util/fucntions.dart';
 
 class SigninPage extends StatefulWidget {
   final AuthenticationBloc authenticationBloc;

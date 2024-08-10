@@ -23,10 +23,11 @@ class CustomAuthButton extends StatelessWidget {
               child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: Theme.of(context).colorScheme.background,
-              ),
+              if (icon != null)
+                Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.background,
+                ),
               const SizedBox(
                 width: 10,
               ),

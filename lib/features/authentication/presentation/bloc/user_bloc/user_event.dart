@@ -40,3 +40,35 @@ class ChangeUserDataEvent extends UserEvent {
   @override
   List<Object> get props => [user];
 }
+
+class FollowUserEvent extends UserEvent {
+  final String id;
+
+  const FollowUserEvent({required this.id});
+  @override
+  List<Object> get props => [id];
+}
+
+class UnfollowUserEvent extends UserEvent {
+  final String id;
+
+  const UnfollowUserEvent({required this.id});
+  @override
+  List<Object> get props => [id];
+}
+
+class FetchFollowingUserEvent extends UserEvent {
+  final List<String> ids;
+
+  const FetchFollowingUserEvent({required this.ids});
+  @override
+  List<Object> get props => [ids];
+}
+
+class FetchFollowersUserEvent extends UserEvent {
+  final List<String> ids;
+
+  const FetchFollowersUserEvent({required this.ids});
+  @override
+  List<Object> get props => [ids];
+}

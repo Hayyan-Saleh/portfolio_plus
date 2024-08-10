@@ -21,10 +21,15 @@ import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/check_user_account_name_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/fetch_offline_user_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/fetch_online_user_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/follow_user_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/get_searched_users_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/get_users_by_ids_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/store_offline_user_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/store_online_user_use_case.dart';
 import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/store_profile_photo_use_case.dart';
+import 'package:portfolio_plus/features/authentication/domain/use_cases/user_use_cases/unfollow_user_use_case.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
+import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
@@ -36,14 +41,17 @@ Future<void> init() async {
   //* bloc
 
   sl.registerFactory(() => UserBloc(
-        changeUserData: sl(),
-        fetchOfflineUser: sl(),
-        fetchOnlineUser: sl(),
-        storeOfflineUser: sl(),
-        storeOnlineUser: sl(),
-      ));
+      changeUserData: sl(),
+      fetchOfflineUser: sl(),
+      fetchOnlineUser: sl(),
+      storeOfflineUser: sl(),
+      storeOnlineUser: sl(),
+      followUser: sl(),
+      unFollowUser: sl(),
+      getUsersByIds: sl()));
   sl.registerFactory(() => UserProfilePictureBloc(storeProfilePhoto: sl()));
   sl.registerFactory(() => UserAccountNameBloc(checkUserAccountName: sl()));
+  sl.registerFactory(() => SearchUsersBloc(getSearchedUsers: sl()));
   sl.registerFactory(() => AuthenticationBloc(
       signupUsingEmailPassword: sl(),
       sendPasswordResetEmail: sl(),
@@ -63,6 +71,11 @@ Future<void> init() async {
       () => StoreProfilePhotoUseCase(userRepository: sl()));
   sl.registerLazySingleton(
       () => CheckUserAccountNameUseCase(userRepository: sl()));
+  sl.registerLazySingleton(() => GetSearchedUsersUseCase(userRepository: sl()));
+  sl.registerLazySingleton(() => GetUsersByIdsUseCase(userRepository: sl()));
+  sl.registerLazySingleton(() => FollowUserUseCase(userRepository: sl()));
+  sl.registerLazySingleton(() => UnFollowUserUseCase(userRepository: sl()));
+
   sl.registerLazySingleton(
       () => SignupUsingEmailPasswordUseCase(authRepository: sl()));
   sl.registerLazySingleton(

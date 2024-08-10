@@ -4,10 +4,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:portfolio_plus/core/errors/failures.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_auth_button.dart';
+import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_button.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_text_form_field.dart';
-import '../../../../core/constants/strings.dart';
-import '../../../../core/util/fucntions.dart';
+import '../../../../../core/constants/strings.dart';
+import '../../../../../core/util/fucntions.dart';
 
 class SignupPage extends StatefulWidget {
   final AuthenticationBloc authenticationBloc;

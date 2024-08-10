@@ -1,48 +1,38 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:drop_down_list/model/selected_list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/constants/maps.dart';
+import 'package:portfolio_plus/core/pages/loading_page.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/util/gender_enum.dart';
 import 'package:portfolio_plus/core/widgets/custom_cached_network_image.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
-import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
-import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/pages/home_page_test.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/custom_user_account_name_text_field.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/drop_down_button.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/number_text_form_field.dart';
-import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_auth_button.dart';
+import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_button.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_text_form_field.dart';
 
-class FillInfoPage extends StatefulWidget {
-  final UserModel userModel;
+class ChangeUserInfoPage extends StatefulWidget {
   final UserProfilePictureBloc userProfilePictureBloc;
   final UserAccountNameBloc userAccountNameBloc;
-  final UserBloc userBloc;
-  final AuthenticationBloc authBloc;
-
-  const FillInfoPage(
+  const ChangeUserInfoPage(
       {super.key,
       required this.userProfilePictureBloc,
-      required this.userBloc,
-      required this.authBloc,
-      required this.userModel,
       required this.userAccountNameBloc});
 
   @override
-  State<FillInfoPage> createState() => _FillInfoPageState();
+  State<ChangeUserInfoPage> createState() => _ChangeUserInfoPageState();
 }
 
-class _FillInfoPageState extends State<FillInfoPage> {
+class _ChangeUserInfoPageState extends State<ChangeUserInfoPage> {
   final GlobalKey<FormState> userNameFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> accountNameFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> phoneNumberFormKey = GlobalKey<FormState>();
@@ -55,56 +45,54 @@ class _FillInfoPageState extends State<FillInfoPage> {
       TextEditingController();
   final TextEditingController userEmailEditingController =
       TextEditingController();
-
   String? imageDownloadLink;
   String? selectedGender;
   Timestamp? birthDate;
   String? countryCode;
-  @override
-  void dispose() {
-    userEmailEditingController.dispose();
-    phoneNumberEditingController.dispose();
-    accountNameEditingController.dispose();
-    super.dispose();
-  }
-
+  bool firstTime = true;
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<UserBloc>.value(
-      value: widget.userBloc,
-      child: BlocBuilder<UserBloc, UserState>(
-        builder: (context, state) {
-          double height = MediaQuery.of(context).size.height;
-          double width = MediaQuery.of(context).size.width;
-          Widget stateWidget =
-              LoadingWidget(color: Theme.of(context).colorScheme.secondary);
-          if (state is LaodedOnlineUserState) {
-            stateWidget = _buildBody(context, state.user, height, width,
-                widget.userProfilePictureBloc);
-          } else if (state is StoredOnlineUserState) {
-            stateWidget = _buildBody(context, state.user, height, width,
-                widget.userProfilePictureBloc);
-          } else if (state is FailedUserState) {
-            showCustomAboutDialog(context, "User Error !",
-                state.failure.failureMessage, null, true);
-          }
-          return SafeArea(
-            child: Scaffold(
-              appBar: buildAppBar(context),
-              backgroundColor: Theme.of(context).colorScheme.background,
-              body: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0.02 * height),
-                child: Center(child: stateWidget),
-              ),
-            ),
-          );
-        },
+    return BlocConsumer<UserBloc, UserState>(
+      listener: (context, state) {
+        if (state is ChangedUserDataState) {
+          Navigator.pop(context);
+        }
+      },
+      builder: (context, state) {
+        Widget statePage = const SizedBox();
+        if (state is LoadingUserState) {
+          statePage = const LoadingPage();
+        } else if (state is LaodedOnlineUserState) {
+          statePage = _buildPage(context, state.user);
+        } else if (state is StoredOnlineUserState) {
+          statePage = _buildPage(context, state.user);
+        } else if (state is LaodedOfflineUserState) {
+          statePage = _buildPage(context, state.user);
+        } else if (state is StoredOfflineUserState) {
+          statePage = _buildPage(context, state.user);
+        }
+        return statePage;
+      },
+    );
+  }
+
+  Widget _buildPage(BuildContext context, UserModel user) {
+    final double height = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
+    return Scaffold(
+      appBar: buildAppBar(context),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 0.05 * width),
+        child: _buildBody(user, height, width),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, UserModel userModel, double height,
-      double width, UserProfilePictureBloc userProfilePictureBloc) {
+  Widget _buildBody(UserModel user, double height, double width) {
+    if (firstTime) {
+      firstTime = false;
+      _initializeTextfields(user);
+    }
     return ListView(
       children: [
         SizedBox(
@@ -113,14 +101,14 @@ class _FillInfoPageState extends State<FillInfoPage> {
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0.01 * height),
           child: _buildProfilePictureWidget(
-              context, height, userProfilePictureBloc),
+              context, user, height, widget.userProfilePictureBloc),
         ),
-        _buildHeadingText2(context, "Upload a profile picture", true, true),
+        _buildHeadingText(context, "Upload a profile picture", true, true),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0.03 * height),
           child: CustomSeperator(height: 0.004 * height, width: 0.3 * width),
         ),
-        _buildHeadingText2(context, "Enter your user name", false, false),
+        _buildHeadingText(context, "Enter your user name", false, false),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0.01 * height),
           child: CustomTextFormField(
@@ -130,7 +118,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
               errorMessage: "Please enter your real name here",
               hintText: ""),
         ),
-        _buildHeadingText2(context, "Enter your account name", false, false),
+        _buildHeadingText(context, "Enter your account name", false, false),
         SizedBox(
           height: 0.01 * height,
         ),
@@ -151,7 +139,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildHeadingText2(context, "Choose your gender", false, false),
+              _buildHeadingText(context, "Choose your gender", false, false),
               _buildChooseGenderWidget(context)
             ],
           ),
@@ -159,14 +147,14 @@ class _FillInfoPageState extends State<FillInfoPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildHeadingText2(context, "Choose your birth date", false, false),
+            _buildHeadingText(context, "Choose your birth date", false, false),
             _buildChooseBirthDateButton(context)
           ],
         ),
         if (birthDate != null)
           _buildDetailsText(
               context,
-              "Your selected birth date is :  ${birthDate!.toDate().day} / ${birthDate!.toDate().month} / ${birthDate!.toDate().year}",
+              "Your birth date is :  ${birthDate!.toDate().day} / ${birthDate!.toDate().month} / ${birthDate!.toDate().year}",
               14),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0.03 * height),
@@ -175,7 +163,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
         SizedBox(
           height: 0.01 * height,
         ),
-        _buildHeadingText2(context, "Enter your phone number", false, false),
+        _buildHeadingText(context, "Enter your phone number", false, false),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0.01 * height),
           child: Row(
@@ -217,25 +205,24 @@ class _FillInfoPageState extends State<FillInfoPage> {
             ],
           ),
         ),
-        if (userModel.email == 'temp email' || userModel.email == '')
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 0.01 * height),
-            child: Column(
-              children: [
-                _buildHeadingText2(
-                    context, "Enter your contact email ", true, false),
-                SizedBox(
-                  height: 0.01 * height,
-                ),
-                CustomTextFormField(
-                    formkey: userEmailFormKey,
-                    obsecure: false,
-                    textEditingController: userEmailEditingController,
-                    errorMessage: "no error",
-                    hintText: "user_email@gmail.com")
-              ],
-            ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 0.01 * height),
+          child: Column(
+            children: [
+              _buildHeadingText(
+                  context, "Enter your contact email ", true, false),
+              SizedBox(
+                height: 0.01 * height,
+              ),
+              CustomTextFormField(
+                  formkey: userEmailFormKey,
+                  obsecure: false,
+                  textEditingController: userEmailEditingController,
+                  errorMessage: "no error",
+                  hintText: "user_email@gmail.com")
+            ],
           ),
+        ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 0.03 * height),
           child: CustomSeperator(height: 0.004 * height, width: 0.3 * width),
@@ -244,9 +231,9 @@ class _FillInfoPageState extends State<FillInfoPage> {
           padding: EdgeInsets.only(bottom: 0.02 * height),
           child: CustomAuthButton(
               icon: Icons.keyboard_double_arrow_right_outlined,
-              onTap: () => _goToHomeScreenOnTap(),
+              onTap: () => _goToHomeScreenOnTap(user),
               child: Text(
-                "Go To Home Screen",
+                "Save Data",
                 style: TextStyle(
                     color: Theme.of(context).colorScheme.background,
                     fontSize: 20,
@@ -257,7 +244,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
     );
   }
 
-  Widget _buildHeadingText2(
+  Widget _buildHeadingText(
       BuildContext context, String text, bool isOptional, bool isCenter) {
     return Row(
       mainAxisAlignment:
@@ -294,22 +281,27 @@ class _FillInfoPageState extends State<FillInfoPage> {
     );
   }
 
-  Widget _buildProfilePictureWidget(BuildContext context, double height,
-      UserProfilePictureBloc userProfilePictureBloc) {
+  Widget _buildProfilePictureWidget(BuildContext context, UserModel user,
+      double height, UserProfilePictureBloc userProfilePictureBloc) {
     return BlocProvider<UserProfilePictureBloc>(
       create: (context) => userProfilePictureBloc,
       child: BlocBuilder<UserProfilePictureBloc, UserProfilePictureState>(
         builder: (context, state) {
           bool clickable = true;
-          Widget stateWidget = CircleAvatar(
-              radius: 0.1 * height,
-              backgroundColor:
-                  Theme.of(context).colorScheme.onPrimary.withAlpha(150),
-              child: Icon(
-                Icons.add_a_photo_outlined,
-                size: 0.07 * height,
-                color: Theme.of(context).colorScheme.primary,
-              ));
+          Widget stateWidget = user.profilePictureUrl != null
+              ? CustomCachedNetworkImage(
+                  isRounded: true,
+                  height: height,
+                  imageUrl: user.profilePictureUrl!)
+              : CircleAvatar(
+                  radius: 0.1 * height,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.onPrimary.withAlpha(150),
+                  child: Icon(
+                    Icons.add_a_photo_outlined,
+                    size: 0.07 * height,
+                    color: Theme.of(context).colorScheme.primary,
+                  ));
           if (state is LoadingUserProfilePhotoState) {
             clickable = false;
             stateWidget = CircleAvatar(
@@ -332,11 +324,11 @@ class _FillInfoPageState extends State<FillInfoPage> {
           return GestureDetector(
               onTap: clickable
                   ? () async {
-                      if (!widget.userBloc.isClosed) {
+                      if (!BlocProvider.of<UserBloc>(context).isClosed) {
                         File? imageFile = await getImage();
                         if (imageFile != null) {
                           userProfilePictureBloc.add(StoreUserProfilePhotoEvent(
-                              userId: widget.userModel.id, file: imageFile));
+                              userId: user.id, file: imageFile));
                         }
                       }
                     }
@@ -422,50 +414,53 @@ class _FillInfoPageState extends State<FillInfoPage> {
     );
   }
 
-  void _goToHomeScreenOnTap() {
+  void _goToHomeScreenOnTap(UserModel user) {
     if (userNameFormKey.currentState!.validate() &&
         accountNameFormKey.currentState!.validate() &&
         selectedGender != null &&
         birthDate != null &&
         countryCode != null &&
         phoneNumberFormKey.currentState!.validate()) {
-      final createdUser = _createFilledInfoUser();
-      widget.userBloc.add(StoreOnlineUserEvent(user: createdUser));
-      Navigator.pushAndRemoveUntil(
-        context,
-        PageTransition(
-          type: PageTransitionType.fade,
-          child: HomePage(
-              userBloc: widget.userBloc,
-              authBloc: widget.authBloc,
-              user: createdUser),
-        ),
-        (route) => false,
-      );
+      final createdUser = _createFilledInfoUser(user);
+      BlocProvider.of<UserBloc>(context)
+          .add(ChangeUserDataEvent(user: createdUser));
     } else {
       showCustomAboutDialog(context, "Error",
           "Please fill all the required data in order to continue", null, true);
     }
   }
 
-  UserModel _createFilledInfoUser() {
+  UserModel _createFilledInfoUser(UserModel user) {
     return UserModel(
         accountName: accountNameEditingController.text.trim(),
-        authenticationType: widget.userModel.authenticationType,
+        authenticationType: user.authenticationType,
         birthDate: birthDate,
-        chatIds: [],
+        chatIds: user.chatIds,
         email: userEmailEditingController.text.trim(),
-        freindsIds: [],
+        followersIds: user.followersIds,
+        followingIds: user.followingIds,
         gender: selectedGender,
-        id: widget.userModel.id,
-        isDarkMode: widget.userModel.isDarkMode,
+        id: user.id,
+        isDarkMode: user.isDarkMode,
         isOffline: false,
         lastSeenTime: Timestamp.now(),
         phoneNumber:
             "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
-        profilePictureUrl: imageDownloadLink,
-        savedPostsIds: [],
+        profilePictureUrl: imageDownloadLink ?? user.profilePictureUrl,
+        savedPostsIds: user.savedPostsIds,
         userName: userNameEditingController.text.trim(),
-        userPostsIds: []);
+        userPostsIds: user.userPostsIds);
+  }
+
+  void _initializeTextfields(UserModel user) {
+    userNameEditingController.text = user.userName ?? "";
+    accountNameEditingController.text = user.accountName ?? "";
+    phoneNumberEditingController.text =
+        user.phoneNumber != null ? getPhoneNumber(user.phoneNumber!) : "";
+    userEmailEditingController.text = user.email ?? "";
+    selectedGender = user.gender;
+    birthDate = user.birthDate;
+    countryCode =
+        user.phoneNumber != null ? getCountryCode(user.phoneNumber!) : "";
   }
 }

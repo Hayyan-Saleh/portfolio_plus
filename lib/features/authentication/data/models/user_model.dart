@@ -29,15 +29,17 @@ class UserModel {
   @HiveField(10)
   final List<String> chatIds;
   @HiveField(11)
-  final List<String> freindsIds;
-  @HiveField(12)
   final bool? isDarkMode;
-  @HiveField(13)
+  @HiveField(12)
   final bool? isOffline;
-  @HiveField(14)
+  @HiveField(13)
   final Timestamp? birthDate;
-  @HiveField(15)
+  @HiveField(14)
   final Timestamp lastSeenTime;
+  @HiveField(15)
+  final List<String> followersIds;
+  @HiveField(16)
+  final List<String> followingIds;
   const UserModel(
       {required this.id,
       required this.isOffline,
@@ -53,7 +55,8 @@ class UserModel {
       required this.userPostsIds,
       required this.savedPostsIds,
       required this.chatIds,
-      required this.freindsIds,
+      required this.followersIds,
+      required this.followingIds,
       required this.isDarkMode});
   factory UserModel.fromJson(Map<String, dynamic> userMap) {
     return UserModel(
@@ -73,8 +76,10 @@ class UserModel {
         savedPostsIds:
             (userMap['savedPostsIds'] as List<dynamic>).cast<String>().toList(),
         chatIds: (userMap['chatIds'] as List<dynamic>).cast<String>().toList(),
-        freindsIds:
-            (userMap['freindsIds'] as List<dynamic>).cast<String>().toList(),
+        followersIds:
+            (userMap['followersIds'] as List<dynamic>).cast<String>().toList(),
+        followingIds:
+            (userMap['followingIds'] as List<dynamic>).cast<String>().toList(),
         isDarkMode: userMap['isDarkMode']);
   }
 
@@ -94,7 +99,8 @@ class UserModel {
       'userPostsIds': userPostsIds,
       'savedPostsIds': savedPostsIds,
       'chatIds': chatIds,
-      'freindsIds': freindsIds,
+      'followersIds': followersIds,
+      'followingIds': followingIds,
       'isDarkMode': isDarkMode
     };
   }

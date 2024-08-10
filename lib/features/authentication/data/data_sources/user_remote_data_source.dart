@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/errors/errors.dart';
+import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 
 abstract class UserRemoteDataSource extends Equatable {
@@ -13,6 +14,10 @@ abstract class UserRemoteDataSource extends Equatable {
   Future<UserModel> storeOnlineUser(UserModel user);
   Future<String> storeProfilePicture(String userId, File file);
   Future<bool> checkAccountName(String accountName);
+  Future<List<UserModel>> getSearchedUsers(String name);
+  Future<UserModel> followUser(String id);
+  Future<UserModel> unfollowUser(String id);
+  Future<List<UserModel>> getUsersByIds(List<String> ids);
 }
 
 class UserRemoteDataSourceImpl implements UserRemoteDataSource {
@@ -90,6 +95,133 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
       return query.docs.isEmpty;
     } catch (e) {
       throw OnlineException(message: ACCOUNT_NAME_CHECKING_ERROR);
+    }
+  }
+
+  @override
+  Future<List<UserModel>> getSearchedUsers(String name) async {
+    try {
+      final CollectionReference usersCollection =
+          FirebaseFirestore.instance.collection('users');
+      final String userId = await getId();
+      final QuerySnapshot query = await usersCollection.get();
+
+      final List<UserModel> users = query.docs
+          .map<UserModel>((userDoc) =>
+              UserModel.fromJson(userDoc.data() as Map<String, dynamic>))
+          .toList();
+      final List<UserModel> filteredUsers = users.where((user) {
+        if (user.accountName != null) {
+          return user.accountName!.contains(name) ||
+              user.userName!.contains(name);
+        } else {
+          return false;
+        }
+      }).toList();
+      return filteredUsers..removeWhere((user) => user.id == userId);
+    } catch (e) {
+      throw OnlineException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<List<UserModel>> getUsersByIds(List<String> ids) async {
+    try {
+      final CollectionReference usersCollection =
+          FirebaseFirestore.instance.collection('users');
+      List<UserModel> users = [];
+      for (String userId in ids) {
+        final DocumentSnapshot userDoc =
+            await usersCollection.doc(userId).get();
+        if (userDoc.exists) {
+          users.add(UserModel.fromJson(userDoc.data() as Map<String, dynamic>));
+        }
+      }
+      return users;
+    } catch (e) {
+      throw OnlineException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<UserModel> unfollowUser(String id) async {
+    try {
+      final CollectionReference usersCollection =
+          FirebaseFirestore.instance.collection('users');
+
+      // Get the current user's ID
+      final String currentUserId = await getId();
+
+      // Fetch the documents for the current user and the user being followed
+      final DocumentSnapshot originalUserDoc =
+          await usersCollection.doc(currentUserId).get();
+      final DocumentSnapshot followingUserDoc =
+          await usersCollection.doc(id).get();
+
+      // Update the "followingIds" list for the original user
+      final UserModel originalUser =
+          UserModel.fromJson(originalUserDoc.data() as Map<String, dynamic>);
+      final List<String> followingIds = originalUser.followingIds;
+      if (followingIds.contains(id)) {
+        followingIds.remove(id);
+        await usersCollection
+            .doc(currentUserId)
+            .update({'followingIds': followingIds});
+      }
+      // Update the "followersIds" list for the followed user
+      final UserModel followingUser =
+          UserModel.fromJson(followingUserDoc.data() as Map<String, dynamic>);
+      final List<String> followersIds = followingUser.followersIds;
+      if (followersIds.contains(currentUserId)) {
+        followersIds.remove(currentUserId);
+        await usersCollection.doc(id).update({'followersIds': followersIds});
+      }
+
+      // Return successfully
+      return await fetchOnlineUser(id);
+    } catch (e) {
+      throw OnlineException(message: e.toString());
+    }
+  }
+
+  @override
+  Future<UserModel> followUser(String id) async {
+    try {
+      final CollectionReference usersCollection =
+          FirebaseFirestore.instance.collection('users');
+
+      // Get the current user's ID
+      final String currentUserId = await getId();
+
+      // Fetch the documents for the current user and the user being followed
+      final DocumentSnapshot originalUserDoc =
+          await usersCollection.doc(currentUserId).get();
+      final DocumentSnapshot followingUserDoc =
+          await usersCollection.doc(id).get();
+
+      // Update the "followingIds" list for the original user
+      final UserModel originalUser =
+          UserModel.fromJson(originalUserDoc.data() as Map<String, dynamic>);
+      final List<String> followingIds = originalUser.followingIds;
+      if (!followingIds.contains(id)) {
+        followingIds.add(id);
+        await usersCollection
+            .doc(currentUserId)
+            .update({'followingIds': followingIds});
+      }
+      // Update the "followersIds" list for the followed user
+      final UserModel followingUser =
+          UserModel.fromJson(followingUserDoc.data() as Map<String, dynamic>);
+      final List<String> followersIds = followingUser.followersIds;
+      if (!followersIds.contains(currentUserId)) {
+        followersIds.add(currentUserId);
+        await usersCollection.doc(id).update({'followersIds': followersIds});
+      }
+
+      // Return successfully
+      return await fetchOnlineUser(id);
+    } catch (e) {
+      throw OnlineException(message: e.toString());
     }
   }
 
