@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:portfolio_plus/core/constants/maps.dart';
 import 'package:portfolio_plus/core/errors/errors.dart';
+ 
 import 'package:portfolio_plus/core/util/auth_enum.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 
@@ -14,6 +15,7 @@ Future<File?> getImage() async {
   final ImagePicker picker = ImagePicker();
   final XFile? image =
       await picker.pickImage(source: ImageSource.gallery); //pic from gallery
+ 
   if (image != null) {
     file = File(image.path);
   }
@@ -55,7 +57,7 @@ void showCustomAboutDialog(BuildContext context, String title, String content,
     },
   );
 }
-
+ 
 Future<String> getId() async {
   if (FirebaseAuth.instance.currentUser != null) {
     return FirebaseAuth.instance.currentUser!.uid;
@@ -87,14 +89,14 @@ String getCountryCode(String number) {
   });
   return countryCode;
 }
-
+ 
 UserModel createThemeUser({required UserModel user, required bool isDark}) {
   return UserModel(
       id: user.id,
       authenticationType: user.authenticationType,
       lastSeenTime: Timestamp.now(),
       chatIds: user.chatIds,
-      userPostsIds: user.userPostsIds,
+      userPostsIds: user.userPostsIds, 
       followersIds: user.followersIds,
       followingIds: user.followingIds,
       savedPostsIds: user.savedPostsIds,
@@ -124,9 +126,10 @@ UserModel createOnlineFetchedUser(
       authenticationType: authType,
       lastSeenTime: Timestamp.now(),
       chatIds: user.chatIds,
-      userPostsIds: user.userPostsIds,
+      userPostsIds: user.userPostsIds, 
       followersIds: user.followersIds,
       followingIds: user.followingIds,
+ 
       savedPostsIds: user.savedPostsIds,
       isOffline: false,
       birthDate: user.birthDate,

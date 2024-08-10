@@ -13,6 +13,7 @@ import 'package:portfolio_plus/features/authentication/domain/repositories/user_
 typedef OnlineInteractionFunc1 = Future<UserModel> Function();
 typedef OnlineInteractionFunc2 = Future<List<UserModel>> Function();
 
+
 class UserRepositoryImpl implements UserRepository {
   final NetworkInfo networkInfo;
   final UserLocalDataSource localDataSource;

@@ -40,7 +40,6 @@ class ChangeUserDataEvent extends UserEvent {
   @override
   List<Object> get props => [user];
 }
-
 class FollowUserEvent extends UserEvent {
   final String id;
 

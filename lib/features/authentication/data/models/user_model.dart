@@ -40,6 +40,7 @@ class UserModel {
   final List<String> followersIds;
   @HiveField(16)
   final List<String> followingIds;
+
   const UserModel(
       {required this.id,
       required this.isOffline,
