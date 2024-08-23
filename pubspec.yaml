@@ -34,6 +34,13 @@ dependencies:
   cached_network_image: ^3.3.1
   flutter_spinkit: ^5.2.1
   page_transition: ^2.1.0
+  uuid: ^4.4.2
+  intl: ^0.19.0
+  firebase_messaging: ^14.7.19
+  toastification: ^2.1.0
+  http: ^1.2.0
+  googleapis_auth: ^1.6.0
+  dio: ^5.6.0
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/other_user_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/user_list_tile.dart';
 
 class UsersPage extends StatelessWidget {
@@ -34,7 +36,17 @@ class UsersPage extends StatelessWidget {
     return ListView.builder(
       itemCount: users.length,
       itemBuilder: (context, index) {
-        return UserListTile(user: users[index]);
+        return UserListTile(
+          user: users[index],
+          onPressed: () => Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.bottomToTop,
+                child: OtherUserPage(
+                  user: users[index],
+                )),
+          ),
+        );
       },
     );
   }

@@ -33,6 +33,19 @@ import 'package:portfolio_plus/features/authentication/presentation/bloc/search_
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
+import 'package:portfolio_plus/features/chat/data/data_sources/chat_box_remote_data_source.dart';
+import 'package:portfolio_plus/features/chat/data/repositories/chat_box_repo_impl.dart';
+import 'package:portfolio_plus/features/chat/domain/repositories/chat_box_repository.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/add_message_use_case.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/create_chat_box_use_case.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/delete_message_use_case.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/get_chat_boxes_use_case.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/listen_to_chat_box_use_case.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/listen_to_user_use_case.dart';
+import 'package:portfolio_plus/features/chat/domain/use_cases/modify_message_use_case.dart';
+import 'package:portfolio_plus/features/chat/presentation/bloc/chat_box_bloc/chat_box_bloc.dart';
+import 'package:portfolio_plus/features/chat/presentation/bloc/chat_boxes_list_bloc/chat_boxes_list_bloc.dart';
+import 'package:portfolio_plus/features/chat/presentation/bloc/chat_page_listener_bloc/chat_page_listener_bloc.dart';
 
 final sl = GetIt.instance;
 Future<void> init() async {
@@ -106,6 +119,45 @@ Future<void> init() async {
 
   sl.registerLazySingleton<AuthRemoteDataSource>(
       () => AuthRemoteDataSourceImpl());
+
+  //! features - chat
+
+  //* bloc
+
+  sl.registerFactory(() => ChatBoxBloc(
+        addMessage: sl(),
+        deleteMessage: sl(),
+        modifyMessage: sl(),
+      ));
+  sl.registerFactory(() => ChatBoxesListBloc(
+      createChatBox: sl(),
+      fetchUser: sl(),
+      getChatBoxes: sl(),
+      listenToChatBox: sl(),
+      listenToUser: sl()));
+  sl.registerFactory(
+      () => ChatPageListenerBloc(listenToChatBox: sl(), listenToUser: sl()));
+
+  //*use_cases
+
+  sl.registerLazySingleton(() => AddMessageUseCase(chatBoxRepository: sl()));
+  sl.registerLazySingleton(() => DeleteMessageUseCase(chatBoxRepository: sl()));
+  sl.registerLazySingleton(() => ModifyMessageUseCase(chatBoxRepository: sl()));
+  sl.registerLazySingleton(() => CreateChatBoxUseCase(chatBoxRepository: sl()));
+  // sl.registerLazySingleton(() => FetchOnlineUserUseCase(userRepository: sl()));
+  sl.registerLazySingleton(() => GetChatBoxesUseCase(chatBoxRepository: sl()));
+  sl.registerLazySingleton(() => ListenToUserUseCase(chatBoxRepository: sl()));
+  sl.registerLazySingleton(
+      () => ListenToChatBoxUseCase(chatBoxRepository: sl()));
+
+  //*repository
+
+  sl.registerLazySingleton<ChatBoxRepository>(
+      () => ChatBoxRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()));
+
+  //*data_sources
+  sl.registerLazySingleton<ChatBoxRemoteDataSource>(
+      () => ChatBoxRemoteDataSourceImpl());
 
   //! core
   sl.registerLazySingleton<NetworkInfo>(

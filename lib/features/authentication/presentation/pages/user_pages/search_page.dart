@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
+import 'package:portfolio_plus/core/widgets/emtpy_data_widget.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/other_user_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/user_list_tile.dart';
 
 class SearchPage extends StatelessWidget {
@@ -52,14 +55,12 @@ class SearchPage extends StatelessWidget {
       BuildContext context, List<UserModel> users, double height) {
     return users.isEmpty
         ? Center(
-            child: Padding(
-            padding: EdgeInsets.only(top: 0.25 * height),
-            child: Text(
-              "No users fount",
-              style:
-                  TextStyle(color: Theme.of(context).colorScheme.onBackground),
-            ),
-          ))
+            child: SizedBox(
+                height: 0.8 * height,
+                child: const EmtpyDataWidget(
+                  title: "No users found for this search!",
+                  subTitle: '',
+                )))
         : SizedBox(
             height: 0.8 * height,
             child: ListView.builder(
@@ -72,7 +73,17 @@ class SearchPage extends StatelessWidget {
                         height: 0.005 * height, width: 0.1 * height),
                   );
                 }
-                return UserListTile(user: users[index - 1]);
+                return UserListTile(
+                  user: users[index - 1],
+                  onPressed: () => Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.bottomToTop,
+                        child: OtherUserPage(
+                          user: users[index - 1],
+                        )),
+                  ),
+                );
               },
             ),
           );

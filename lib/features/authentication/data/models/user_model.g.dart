@@ -34,6 +34,8 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       followersIds: (fields[15] as List).cast<String>(),
       followingIds: (fields[16] as List).cast<String>(),
       isDarkMode: fields[11] as bool?,
+      userFCM: fields[17] as String?,
+      isNotificationsPermissionGranted: fields[18] as bool?,
     );
   }
 
@@ -74,7 +76,11 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(15)
       ..write(obj.followersIds)
       ..writeByte(16)
-      ..write(obj.followingIds);
+      ..write(obj.followingIds)
+      ..writeByte(17)
+      ..write(obj.userFCM)
+      ..writeByte(18)
+      ..write(obj.isNotificationsPermissionGranted);
   }
 
   @override

@@ -1,42 +1,46 @@
 import 'package:flutter/material.dart';
 
-class NumberTextFormField extends StatefulWidget {
+class ChatTextFormField extends StatefulWidget {
   final GlobalKey<FormState> formkey;
   final TextEditingController textEditingController;
-  final String hintText;
-  const NumberTextFormField(
+  final String hintText, errorMessage;
+  const ChatTextFormField(
       {required this.formkey,
       required this.textEditingController,
+      required this.errorMessage,
       required this.hintText,
       super.key});
 
   @override
-  State<NumberTextFormField> createState() => _NumberTextFormFieldState();
+  State<ChatTextFormField> createState() => _CustomTextFormFieldState();
 }
 
-class _NumberTextFormFieldState extends State<NumberTextFormField> {
+class _CustomTextFormFieldState extends State<ChatTextFormField> {
   @override
   Widget build(BuildContext context) {
     return Form(
       key: widget.formkey,
       child: TextFormField(
         cursorColor: Theme.of(context).colorScheme.secondary,
-        keyboardType: TextInputType.number,
-        autocorrect: false,
+        autocorrect: true,
         controller: widget.textEditingController,
         validator: (val) {
           if (val == null || val == '') {
-            return "Please enter a number";
+            return widget.errorMessage;
           }
           return null;
         },
+        maxLines: 5,
+        minLines: 1,
         style: TextStyle(color: Theme.of(context).colorScheme.primary),
         decoration: InputDecoration(
-            contentPadding: const EdgeInsets.all(10),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             errorStyle: const TextStyle(color: Colors.red),
             hintStyle: TextStyle(
                 color: Theme.of(context).colorScheme.primary.withAlpha(150)),
             enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
                 borderSide:
                     BorderSide(color: Theme.of(context).colorScheme.secondary)),
             hintText: widget.hintText,

@@ -52,15 +52,25 @@ class _SigninPageState extends State<SigninPage> {
               widget.authenticationBloc
                   .add(SendVerificationEmailAuthenticationEvent());
             } else if (state.authType == AuthenticationType.googleAuth) {
-              Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (_) => MiddlePointPage(
-                          authBloc: widget.authenticationBloc,
-                          userBloc: widget.userBloc,
-                          userModel: createTemporarUser(
-                              authenticationType: AuthenticationType.googleAuth,
-                              email: emailTextEditingController.text.trim()))),
-                  (route) => false);
+              final String? userFCM = await getUserFCM();
+              final bool isNotificationsPermissionGranted =
+                  await getNotificationPermission();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (_) => MiddlePointPage(
+                            authBloc: widget.authenticationBloc,
+                            userBloc: widget.userBloc,
+                            userModel: createTemporarUser(
+                                isNotificationsPermissionGranted:
+                                    isNotificationsPermissionGranted,
+                                userFCM: userFCM ?? '',
+                                authenticationType:
+                                    AuthenticationType.googleAuth,
+                                email:
+                                    emailTextEditingController.text.trim()))),
+                    (route) => false);
+              }
             }
           } else if (state is FailedAuthenticationState) {
             if (state.failure is OnlineFailure) {
@@ -72,16 +82,25 @@ class _SigninPageState extends State<SigninPage> {
                   true);
             } else if (state.failure.failureMessage ==
                 EMAIL_ALREADY_VERIFIED_MESSAGE) {
-              Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                      builder: (context) => MiddlePointPage(
-                          authBloc: widget.authenticationBloc,
-                          userBloc: widget.userBloc,
-                          userModel: createTemporarUser(
-                              authenticationType:
-                                  AuthenticationType.emailPasswordAuth,
-                              email: emailTextEditingController.text.trim()))),
-                  (route) => false);
+              final String? userFCM = await getUserFCM();
+              final bool isNotificationsPermissionGranted =
+                  await getNotificationPermission();
+              if (context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => MiddlePointPage(
+                            authBloc: widget.authenticationBloc,
+                            userBloc: widget.userBloc,
+                            userModel: createTemporarUser(
+                                isNotificationsPermissionGranted:
+                                    isNotificationsPermissionGranted,
+                                userFCM: userFCM ?? "",
+                                authenticationType:
+                                    AuthenticationType.emailPasswordAuth,
+                                email:
+                                    emailTextEditingController.text.trim()))),
+                    (route) => false);
+              }
             } else {
               showCustomAboutDialog(context, "Auth Error !",
                   state.failure.failureMessage, null, true);

@@ -16,3 +16,7 @@ const String PHOTO_FETCHING_ERROR =
     "There is an error causing misfuntionality in fetching data .... please try again later";
 const String ACCOUNT_NAME_CHECKING_ERROR =
     "There is an error checking the validation of the account name";
+
+const String TEXT_CONTENT_TYPE = "TEXT_CONTENT_TYPE";
+const String IMAGE_CONTENT_TYPE = "IMAGE_CONTENT_TYPE";
+const String AUDIO_CONTENT_TYPE = "AUDIO_CONTENT_TYPE";

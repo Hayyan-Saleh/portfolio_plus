@@ -40,9 +40,15 @@ class UserModel {
   final List<String> followersIds;
   @HiveField(16)
   final List<String> followingIds;
+  @HiveField(17)
+  final String? userFCM;
+  @HiveField(18)
+  final bool? isNotificationsPermissionGranted;
 
   const UserModel(
       {required this.id,
+      required this.userFCM,
+      required this.isNotificationsPermissionGranted,
       required this.isOffline,
       required this.birthDate,
       required this.lastSeenTime,
@@ -59,9 +65,13 @@ class UserModel {
       required this.followersIds,
       required this.followingIds,
       required this.isDarkMode});
+
   factory UserModel.fromJson(Map<String, dynamic> userMap) {
     return UserModel(
         id: userMap['id'],
+        userFCM: userMap['userFCM'],
+        isNotificationsPermissionGranted:
+            userMap['isNotificationsPermissionGranted'],
         isOffline: userMap['isOffline'],
         birthDate: userMap['birthDate'],
         lastSeenTime: userMap['lastSeenTime'],
@@ -87,6 +97,8 @@ class UserModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userFCM': userFCM,
+      'isNotificationsPermissionGranted': isNotificationsPermissionGranted,
       'isOffline': isOffline,
       'birthDate': birthDate,
       'lastSeenTime': lastSeenTime,

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
+import 'package:portfolio_plus/core/util/globale_variables.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
@@ -13,6 +17,9 @@ import 'package:portfolio_plus/features/authentication/presentation/pages/auth_p
 import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/change_user_info_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/main_user_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/search_page.dart';
+import 'package:portfolio_plus/features/chat/presentation/bloc/chat_boxes_list_bloc/chat_boxes_list_bloc.dart';
+import 'package:portfolio_plus/features/chat/presentation/pages/chat_list_page.dart';
+import 'package:toastification/toastification.dart';
 
 class HomePage extends StatefulWidget {
   final UserBloc userBloc;
@@ -21,15 +28,18 @@ class HomePage extends StatefulWidget {
   final UserModel user;
   final UserAccountNameBloc userAccountNameBloc;
   final UserProfilePictureBloc userProfilePictureBloc;
-  const HomePage({
-    super.key,
-    required this.userBloc,
-    required this.userAccountNameBloc,
-    required this.userProfilePictureBloc,
-    required this.authBloc,
-    required this.user,
-    required this.searchUsersBloc,
-  });
+  final ChatBoxesListBloc chatBoxesListBloc;
+  final int? initialNavbarIndex;
+  const HomePage(
+      {super.key,
+      required this.userBloc,
+      required this.userAccountNameBloc,
+      required this.userProfilePictureBloc,
+      required this.authBloc,
+      required this.user,
+      required this.searchUsersBloc,
+      required this.initialNavbarIndex,
+      required this.chatBoxesListBloc});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -39,7 +49,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _signout = false;
   UserModel? userModel;
   late bool _darkMode = false;
-  int _navbarIndex = 0;
+  late int _navbarIndex;
 
   void _changeNavbarIndex(int value) {
     setState(() {
@@ -51,6 +61,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    //handle bottom navbar initial index
+    _navbarIndex = widget.initialNavbarIndex ?? 0;
+    //  notification handle
+    _handleNotificationMessages();
   }
 
   @override
@@ -88,9 +103,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 listener: (context, state) {
                   if (state is SignedoutAuthenticationState) {
                     _signout = true;
-                    widget.userBloc.add(StoreOfflineUserEvent(
-                        user: createNoAuthUser(user: state.user)));
                     widget.userBloc.add(StoreOnlineUserEvent(
+                        user: createNoAuthUser(user: state.user)));
+                    widget.userBloc.add(StoreOfflineUserEvent(
                         user: createNoAuthUser(user: state.user)));
                   }
                 },
@@ -169,20 +184,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     ),
                   );
                 }
-                final pages = <Widget>[
-                  ListView(
-                    children: [
-                      Center(child: stateWidget),
-                    ],
-                  ),
-                  SearchPage(),
-                  MainUserPage(user: userModel ?? widget.user)
-                ].map((page) => RefreshIndicator(
-                    child: page,
-                    onRefresh: () async {
-                      widget.userBloc
-                          .add(GetOnlineUserEvent(id: widget.user.id));
-                    }));
+                final pages = _getAppPages(stateWidget);
                 return SafeArea(
                   child: Scaffold(
                     appBar: buildAppBar(context),
@@ -191,7 +193,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     bottomNavigationBar: BottomNavigationBar(
                       currentIndex: _navbarIndex,
                       onTap: (value) => _changeNavbarIndex(value),
-                      items: _getNavbarItems(),
+                      items: _buildNavbarItems(),
+                      elevation: 1,
                       selectedLabelStyle: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -218,7 +221,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             )));
   }
 
-  List<BottomNavigationBarItem> _getNavbarItems() {
+  List<Widget> _getAppPages(Widget stateWidget) {
+    return <Widget>[
+      _wrapWithLoadUserRefreshIndicator(ListView(
+        children: [
+          Center(child: stateWidget),
+        ],
+      )),
+      _wrapWithLoadUserRefreshIndicator(SearchPage()),
+      _wrapWithLoadUserRefreshIndicator(
+          MainUserPage(user: userModel ?? widget.user)),
+      ChatListPage(
+        originalUser: userModel ?? widget.user,
+      )
+    ];
+  }
+
+  Widget _wrapWithLoadUserRefreshIndicator(Widget page) {
+    return RefreshIndicator(
+        child: page,
+        onRefresh: () async {
+          widget.userBloc.add(GetOnlineUserEvent(id: widget.user.id));
+        });
+  }
+
+  List<BottomNavigationBarItem> _buildNavbarItems() {
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         backgroundColor:
@@ -240,6 +267,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             Theme.of(context).colorScheme.background.withAlpha(150),
         icon: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
         label: 'Profile',
+      ),
+      BottomNavigationBarItem(
+        backgroundColor:
+            Theme.of(context).colorScheme.background.withAlpha(150),
+        icon: Icon(
+          Icons.chat,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        label: 'Chat',
       ),
     ];
   }
@@ -338,5 +374,83 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   userProfilePictureBloc: widget.userProfilePictureBloc,
                   userAccountNameBloc: widget.userAccountNameBloc),
             )));
+  }
+
+  Future<void> _firebaseMessagingMessageForegroundHandler(
+      BuildContext context, RemoteMessage message) async {
+    final String title = message.notification!.title!;
+    final String body = message.notification!.body!;
+    toastification.show(
+      context: context,
+      type: ToastificationType.info,
+      style: ToastificationStyle.fillColored,
+      autoCloseDuration: const Duration(seconds: 5),
+      title: Text(title),
+      description: Text(body),
+      alignment: Alignment.topCenter,
+      animationDuration: const Duration(milliseconds: 300),
+      primaryColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.background,
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      borderRadius: BorderRadius.circular(12),
+      progressBarTheme: ProgressIndicatorThemeData(
+          linearTrackColor: Theme.of(context).colorScheme.onPrimary,
+          color: Theme.of(context).colorScheme.primary.withAlpha(100)),
+      showProgressBar: true,
+      closeButtonShowType: CloseButtonShowType.onHover,
+      closeOnClick: false,
+      callbacks: ToastificationCallbacks(
+        onTap: (value) {
+          setState(() {
+            _navbarIndex = 3;
+          });
+        },
+      ),
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
+  }
+
+  Future<void> _handleNotificationMessages() async {
+    //* Get any messages which caused the application to open from a terminated state.
+
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      if (initialMessage.notification!.title!.contains("New Message")) {
+        if (jsonDecode(initialMessage.data['otherUserId']) == widget.user.id) {
+          setState(() {
+            _navbarIndex = 3;
+          });
+        }
+      }
+    }
+
+    //* Get any messages which caused the application to open from a background state.
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        if (message.notification!.title!.contains("New Message")) {
+          if (jsonDecode(message.data['otherUserId']) == widget.user.id) {
+            setState(() {
+              _navbarIndex = 3;
+            });
+          }
+        }
+      }
+    });
+
+    //* Get any messages which caused the application to open from a foreground state.
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        if (message.notification!.title!.contains("New Message")) {
+          if (jsonDecode(message.data['otherUserId']) == widget.user.id &&
+              !isOnChatPage) {
+            _firebaseMessagingMessageForegroundHandler(context, message);
+          }
+        }
+      }
+    });
   }
 }

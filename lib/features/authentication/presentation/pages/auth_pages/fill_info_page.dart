@@ -23,6 +23,7 @@ import 'package:portfolio_plus/features/authentication/presentation/widgets/othe
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/number_text_form_field.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_button.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_text_form_field.dart';
+import 'package:portfolio_plus/features/chat/presentation/bloc/chat_boxes_list_bloc/chat_boxes_list_bloc.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
 
 class FillInfoPage extends StatefulWidget {
@@ -438,12 +439,14 @@ class _FillInfoPageState extends State<FillInfoPage> {
         PageTransition(
           type: PageTransitionType.fade,
           child: HomePage(
+              chatBoxesListBloc: di.sl<ChatBoxesListBloc>(),
               userAccountNameBloc: widget.userAccountNameBloc,
               userProfilePictureBloc: widget.userProfilePictureBloc,
               searchUsersBloc: di.sl<SearchUsersBloc>(),
               userBloc: widget.userBloc,
               authBloc: widget.authBloc,
-              user: createdUser),
+              user: createdUser,
+              initialNavbarIndex: 0),
         ),
         (route) => false,
       );
@@ -455,23 +458,27 @@ class _FillInfoPageState extends State<FillInfoPage> {
 
   UserModel _createFilledInfoUser() {
     return UserModel(
-        accountName: accountNameEditingController.text.trim(),
-        authenticationType: widget.userModel.authenticationType,
-        birthDate: birthDate,
-        chatIds: [],
-        email: userEmailEditingController.text.trim(),
-        followersIds: [],
-        followingIds: [],
-        gender: selectedGender,
-        id: widget.userModel.id,
-        isDarkMode: widget.userModel.isDarkMode,
-        isOffline: false,
-        lastSeenTime: Timestamp.now(),
-        phoneNumber:
-            "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
-        profilePictureUrl: imageDownloadLink,
-        savedPostsIds: [],
-        userName: userNameEditingController.text.trim(),
-        userPostsIds: []);
+      accountName: accountNameEditingController.text.trim(),
+      authenticationType: widget.userModel.authenticationType,
+      birthDate: birthDate,
+      chatIds: [],
+      email: userEmailEditingController.text.trim(),
+      followersIds: [],
+      followingIds: [],
+      gender: selectedGender,
+      id: widget.userModel.id,
+      isDarkMode: widget.userModel.isDarkMode,
+      isOffline: false,
+      lastSeenTime: Timestamp.now(),
+      phoneNumber:
+          "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
+      profilePictureUrl: imageDownloadLink,
+      savedPostsIds: [],
+      userName: userNameEditingController.text.trim(),
+      userPostsIds: [],
+      isNotificationsPermissionGranted:
+          widget.userModel.isNotificationsPermissionGranted,
+      userFCM: widget.userModel.userFCM,
+    );
   }
 }

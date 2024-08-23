@@ -432,24 +432,27 @@ class _ChangeUserInfoPageState extends State<ChangeUserInfoPage> {
 
   UserModel _createFilledInfoUser(UserModel user) {
     return UserModel(
-        accountName: accountNameEditingController.text.trim(),
-        authenticationType: user.authenticationType,
-        birthDate: birthDate,
-        chatIds: user.chatIds,
-        email: userEmailEditingController.text.trim(),
-        followersIds: user.followersIds,
-        followingIds: user.followingIds,
-        gender: selectedGender,
-        id: user.id,
-        isDarkMode: user.isDarkMode,
-        isOffline: false,
-        lastSeenTime: Timestamp.now(),
-        phoneNumber:
-            "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
-        profilePictureUrl: imageDownloadLink ?? user.profilePictureUrl,
-        savedPostsIds: user.savedPostsIds,
-        userName: userNameEditingController.text.trim(),
-        userPostsIds: user.userPostsIds);
+      accountName: accountNameEditingController.text.trim(),
+      authenticationType: user.authenticationType,
+      birthDate: birthDate,
+      chatIds: user.chatIds,
+      email: userEmailEditingController.text.trim(),
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+      gender: selectedGender,
+      id: user.id,
+      isDarkMode: user.isDarkMode,
+      isOffline: false,
+      lastSeenTime: Timestamp.now(),
+      phoneNumber:
+          "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
+      profilePictureUrl: imageDownloadLink ?? user.profilePictureUrl,
+      savedPostsIds: user.savedPostsIds,
+      userName: userNameEditingController.text.trim(),
+      userPostsIds: user.userPostsIds,
+      isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
+      userFCM: user.userFCM,
+    );
   }
 
   void _initializeTextfields(UserModel user) {

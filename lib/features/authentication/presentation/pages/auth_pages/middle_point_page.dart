@@ -11,6 +11,7 @@ import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bl
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/auth_pages/fill_info_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/home_page.dart';
+import 'package:portfolio_plus/features/chat/presentation/bloc/chat_boxes_list_bloc/chat_boxes_list_bloc.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
 
 class MiddlePointPage extends StatefulWidget {
@@ -61,12 +62,14 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
     );
   }
 
-  void _handleLoadedUser(UserModel user) {
+  void _handleLoadedUser(UserModel user) async {
     if (user.accountName == '') {
       _navigateToFillUserInfoPage(user: user);
     } else {
       final UserModel authenticatedFetchedUser = createOnlineFetchedUser(
-          user: user, authType: widget.userModel.authenticationType);
+          user: user,
+          authType: widget.userModel.authenticationType,
+          userFCM: user.userFCM);
       widget.userBloc.add(StoreOnlineUserEvent(user: authenticatedFetchedUser));
       widget.userBloc
           .add(StoreOfflineUserEvent(user: authenticatedFetchedUser));
@@ -74,6 +77,8 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
         context,
         MaterialPageRoute(
             builder: (context) => HomePage(
+                  initialNavbarIndex: 0,
+                  chatBoxesListBloc: di.sl<ChatBoxesListBloc>(),
                   userAccountNameBloc: di.sl<UserAccountNameBloc>(),
                   userProfilePictureBloc: di.sl<UserProfilePictureBloc>(),
                   searchUsersBloc: di.sl<SearchUsersBloc>(),
@@ -94,7 +99,9 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
                 userAccountNameBloc: userAccountNameBloc,
                 userProfilePictureBloc: userPorfilePictureBloc,
                 userModel: createOnlineFetchedUser(
-                    user: user, authType: widget.userModel.authenticationType),
+                    user: user,
+                    authType: widget.userModel.authenticationType,
+                    userFCM: widget.userModel.userFCM),
                 authBloc: widget.authBloc,
                 userBloc: widget.userBloc,
               )),
