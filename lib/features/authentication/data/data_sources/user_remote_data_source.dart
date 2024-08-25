@@ -226,7 +226,6 @@ class UserRemoteDataSourceImpl implements UserRemoteDataSource {
   }
 
   @override
-
   List<Object?> get props => [];
 
   @override

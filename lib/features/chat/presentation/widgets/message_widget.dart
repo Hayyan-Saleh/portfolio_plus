@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:portfolio_plus/core/constants/strings.dart';
+import 'package:portfolio_plus/core/util/fucntions.dart';
+import 'package:portfolio_plus/core/widgets/custom_cached_network_image.dart';
+import 'package:portfolio_plus/core/widgets/show_image_page.dart';
 import 'package:portfolio_plus/features/chat/domain/entities/message_entity.dart';
 import 'package:intl/intl.dart';
 
@@ -46,12 +51,9 @@ class MessageWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              message.content,
-              textAlign: TextAlign.start,
-              overflow: TextOverflow.clip,
-              style: TextStyle(color: Theme.of(context).colorScheme.background),
-            ),
+            message.contentType == IMAGE_CONTENT_TYPE
+                ? _buildImageContent(context)
+                : _buildTextContent(context),
             const SizedBox(
               height: 5,
             ),
@@ -104,13 +106,9 @@ class MessageWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              message.content,
-              textAlign: TextAlign.end,
-              overflow: TextOverflow.clip,
-              style:
-                  TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-            ),
+            message.contentType == IMAGE_CONTENT_TYPE
+                ? _buildImageContent(context)
+                : _buildTextContent(context),
             const SizedBox(
               height: 5,
             ),
@@ -147,5 +145,32 @@ class MessageWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildTextContent(BuildContext context) {
+    return Text(
+      message.content,
+      textAlign: TextAlign.end,
+      overflow: TextOverflow.clip,
+      style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+    );
+  }
+
+  Widget _buildImageContent(BuildContext context) {
+    return GestureDetector(
+        onTap: () {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.fade,
+                  child: ShowImagePage(
+                    message: message,
+                  )));
+        },
+        child: CustomCachedNetworkImage(
+          imageUrl: message.content,
+          isRounded: false,
+          height: 0.25 * getHeight(context),
+        ));
   }
 }

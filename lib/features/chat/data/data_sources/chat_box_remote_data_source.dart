@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:portfolio_plus/core/errors/errors.dart';
+import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/chat/data/models/chat_box_model.dart';
@@ -18,9 +21,8 @@ abstract class ChatBoxRemoteDataSource extends Equatable {
   void listenToUser(String userId, StreamController<UserModel> controller);
   void listenToChatBox(
       String chatBoxId, StreamController<ChatBoxModel> controller);
-  //! the following methods implementations will be changed in the future based on the message type
   Future<void> addMessage(UserModel originalUser, UserModel otherUser,
-      String chatBoxId, MessageModel message);
+      String chatBoxId, MessageModel message, File? file);
   Future<void> modifyMessage(
       String chatBoxId, MessageModel oldMessage, MessageModel newMessage);
   Future<void> deleteMessage(String chatBoxId, MessageModel message);
@@ -82,13 +84,31 @@ class ChatBoxRemoteDataSourceImpl implements ChatBoxRemoteDataSource {
 
   @override
   Future<void> addMessage(UserModel originalUser, UserModel otherUser,
-      String chatBoxId, MessageModel message) async {
+      String chatBoxId, MessageModel message, File? file) async {
     final DocumentReference chatBoxDoc =
         FirebaseFirestore.instance.collection('chats').doc(chatBoxId);
-    await chatBoxDoc.update({
-      'lastMessage': message.toJson(),
-      'messages': FieldValue.arrayUnion([message.toJson()])
-    });
+    switch (message.contentType) {
+      case IMAGE_CONTENT_TYPE:
+        final Reference referenceForStorage = FirebaseStorage.instance
+            .ref("users_chat_pictures")
+            .child(chatBoxId)
+            .child(message.imageName!);
+        await referenceForStorage.putFile(file!);
+        final String downloadLink = await referenceForStorage.getDownloadURL();
+        message = _createImageMessage(message, downloadLink);
+        await chatBoxDoc.update({
+          'lastMessage': message.toJson(),
+          'messages': FieldValue.arrayUnion([message.toJson()])
+        });
+        break;
+      case TEXT_CONTENT_TYPE:
+        await chatBoxDoc.update({
+          'lastMessage': message.toJson(),
+          'messages': FieldValue.arrayUnion([message.toJson()])
+        });
+        break;
+    }
+
     if (otherUser.isNotificationsPermissionGranted!) {
       final done = await sendNotification(
           originalUser, otherUser, await _getChatBox(chatBoxId), message);
@@ -100,6 +120,13 @@ class ChatBoxRemoteDataSourceImpl implements ChatBoxRemoteDataSource {
 
   @override
   Future<void> deleteMessage(String chatBoxId, MessageModel message) async {
+    if (message.contentType == IMAGE_CONTENT_TYPE) {
+      final Reference referenceForStorage = FirebaseStorage.instance
+          .ref("users_chat_pictures")
+          .child(chatBoxId)
+          .child(message.imageName!);
+      await referenceForStorage.delete();
+    }
     final DocumentReference chatBoxDoc =
         FirebaseFirestore.instance.collection('chats').doc(chatBoxId);
     await chatBoxDoc.update({
@@ -157,7 +184,9 @@ class ChatBoxRemoteDataSourceImpl implements ChatBoxRemoteDataSource {
         "token": otherUser.userFCM,
         "notification": {
           "title": "New Message from ${getFirstName(originalUser.userName!)}",
-          "body": message.content
+          "body": message.contentType == IMAGE_CONTENT_TYPE
+              ? "Picture"
+              : message.content
         },
         "android": {
           "notification": {
@@ -253,5 +282,17 @@ class ChatBoxRemoteDataSourceImpl implements ChatBoxRemoteDataSource {
     await FirebaseFirestore.instance.collection('users').doc(userId).update({
       'chatIds': FieldValue.arrayUnion([chatId])
     });
+  }
+
+  MessageModel _createImageMessage(
+      MessageModel messageModel, String downloadLink) {
+    return MessageModel(
+        senderId: messageModel.senderId,
+        imageName: messageModel.imageName,
+        date: messageModel.date,
+        contentType: messageModel.contentType,
+        content: downloadLink,
+        isSeen: messageModel.isSeen,
+        isEdited: messageModel.isEdited);
   }
 }

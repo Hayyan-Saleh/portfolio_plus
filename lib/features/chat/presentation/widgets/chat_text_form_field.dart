@@ -4,11 +4,13 @@ class ChatTextFormField extends StatefulWidget {
   final GlobalKey<FormState> formkey;
   final TextEditingController textEditingController;
   final String hintText, errorMessage;
+  final FocusNode focusNode;
   const ChatTextFormField(
       {required this.formkey,
       required this.textEditingController,
       required this.errorMessage,
       required this.hintText,
+      required this.focusNode,
       super.key});
 
   @override
@@ -21,6 +23,7 @@ class _CustomTextFormFieldState extends State<ChatTextFormField> {
     return Form(
       key: widget.formkey,
       child: TextFormField(
+        focusNode: widget.focusNode,
         cursorColor: Theme.of(context).colorScheme.secondary,
         autocorrect: true,
         controller: widget.textEditingController,

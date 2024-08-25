@@ -23,10 +23,12 @@ class OtherUserPage extends StatefulWidget {
 
 class _OtherUserPageState extends State<OtherUserPage> {
   UserModel? stateUser;
+
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
     final double width = MediaQuery.of(context).size.width;
+    fetchUser();
     return Scaffold(
       appBar: buildAppBar(context),
       body: ListView(
@@ -316,5 +318,10 @@ class _OtherUserPageState extends State<OtherUserPage> {
         )
       ],
     );
+  }
+
+  Future<void> fetchUser() async {
+    BlocProvider.of<UserBloc>(context)
+        .add(GetOnlineUserEvent(id: await getId()));
   }
 }

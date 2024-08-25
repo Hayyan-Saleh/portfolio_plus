@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/errors/failures.dart';
@@ -26,10 +27,18 @@ class ChatBoxRepositoryImpl implements ChatBoxRepository {
       {required this.networkInfo, required this.remoteDataSource});
 
   @override
-  Future<Either<AppFailure, Unit>> addMessage(UserModel originalUser,
-      UserModel otherUser, String chatBoxId, MessageEntity message) async {
+  Future<Either<AppFailure, Unit>> addMessage(
+      UserModel originalUser,
+      UserModel otherUser,
+      String chatBoxId,
+      MessageEntity message,
+      File? file) async {
     return await _mapCURDInteraction(() => remoteDataSource.addMessage(
-        originalUser, otherUser, chatBoxId, _convetToMessageModel(message)));
+        originalUser,
+        otherUser,
+        chatBoxId,
+        _convetToMessageModel(message),
+        file));
   }
 
   @override
@@ -126,6 +135,7 @@ class ChatBoxRepositoryImpl implements ChatBoxRepository {
   MessageModel _convetToMessageModel(MessageEntity message) {
     return MessageModel(
         senderId: message.senderId,
+        imageName: message.imageName,
         date: message.date,
         contentType: message.contentType,
         content: message.content,

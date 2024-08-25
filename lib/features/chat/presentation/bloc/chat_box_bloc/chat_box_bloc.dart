@@ -1,5 +1,7 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
@@ -27,7 +29,7 @@ class ChatBoxBloc extends Bloc<ChatBoxEvent, ChatBoxState> {
     on<ChatBoxEvent>((event, emit) async {
       if (event is AddMessageEvent) {
         await _mapEither(() => addMessage(event.originalUser, event.otherUser,
-            event.chatBoxId, event.message));
+            event.chatBoxId, event.message, event.file));
       } else if (event is DeleteMessageEvent) {
         await _mapEither(() => deleteMessage(event.chatBoxId, event.message));
       } else if (event is ModifyMessageEvent) {

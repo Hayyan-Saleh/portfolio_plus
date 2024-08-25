@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
+import 'package:portfolio_plus/core/widgets/failed_widget.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
@@ -24,9 +25,8 @@ class UsersPage extends StatelessWidget {
           } else if (state is LoadedFollowingUserState) {
             return _buildBody(context, state.users);
           } else if (state is FailedUserState) {
-            return Center(
-              child: Text(state.failure.failureMessage),
-            );
+            return FailedWidget(
+                title: "Error", subTitle: state.failure.failureMessage);
           }
           return const SizedBox();
         }));

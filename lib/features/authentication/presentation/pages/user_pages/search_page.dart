@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
 import 'package:portfolio_plus/core/widgets/emtpy_data_widget.dart';
+import 'package:portfolio_plus/core/widgets/failed_widget.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
@@ -36,13 +37,10 @@ class SearchPage extends StatelessWidget {
             } else if (state is SearchedUsersState) {
               return _buildResultWidget(context, state.users, height);
             } else if (state is FailedSearchUsersState) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground),
-                ),
-              );
+              return FailedWidget(
+                  title:
+                      "Error searching for ${searchTextEditingController.text}",
+                  subTitle: state.message);
             }
             return const SizedBox();
           },

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:portfolio_plus/core/errors/failures.dart';
@@ -10,10 +12,14 @@ class AddMessageUseCase extends Equatable {
 
   const AddMessageUseCase({required this.chatBoxRepository});
 
-  Future<Either<AppFailure, Unit>> call(UserModel originalUser,
-      UserModel otherUser, String chatBoxId, MessageEntity message) async {
+  Future<Either<AppFailure, Unit>> call(
+      UserModel originalUser,
+      UserModel otherUser,
+      String chatBoxId,
+      MessageEntity message,
+      File? file) async {
     return await chatBoxRepository.addMessage(
-        originalUser, otherUser, chatBoxId, message);
+        originalUser, otherUser, chatBoxId, message, file);
   }
 
   @override

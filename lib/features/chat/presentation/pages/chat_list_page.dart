@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/globale_variables.dart';
 import 'package:portfolio_plus/core/widgets/emtpy_data_widget.dart';
+import 'package:portfolio_plus/core/widgets/failed_widget.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
@@ -125,10 +126,8 @@ class _ChatListPageState extends State<ChatListPage> {
             }
             return _buildChatListTiles();
           } else if (state is FailedChatBoxesListState) {
-            return Center(
-              child: Text(state.failure.failureMessage,
-                  textAlign: TextAlign.center),
-            );
+            return FailedWidget(
+                title: "Error", subTitle: state.failure.failureMessage);
           }
           chatBoxesListBloc.add(GetChatBoxesEvent(
             chatBoxesIds: loadedOriginalUser != null

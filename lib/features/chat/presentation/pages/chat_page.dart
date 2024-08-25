@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/util/content_enum.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/widgets/custom_cached_network_image.dart';
@@ -13,7 +16,7 @@ import 'package:portfolio_plus/features/chat/domain/entities/message_entity.dart
 import 'package:portfolio_plus/features/chat/presentation/bloc/chat_box_bloc/chat_box_bloc.dart';
 import 'package:portfolio_plus/features/chat/presentation/bloc/chat_page_listener_bloc/chat_page_listener_bloc.dart';
 import 'package:portfolio_plus/features/chat/presentation/widgets/chat_text_form_field.dart';
-import 'package:portfolio_plus/features/chat/presentation/widgets/messageWidget.dart';
+import 'package:portfolio_plus/features/chat/presentation/widgets/message_widget.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
 
 class ChatPage extends StatefulWidget {
@@ -41,6 +44,8 @@ class _ChatPageState extends State<ChatPage> {
   bool _showGoToLastMessageButton = false;
   bool _isEditingMessage = false;
   bool _goToMaxViewExtentOnInit = true;
+  final FocusNode _focusNode = FocusNode();
+  bool _isTextfieldFocusGained = false;
   MessageEntity? _editedMessage;
   int? popupMenuValue;
   late final ChatPageListenerBloc _chatPageListenerBloc;
@@ -48,11 +53,16 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void initState() {
+    super.initState();
     _chatBoxBloc = di.sl<ChatBoxBloc>();
     _chatPageListenerBloc = di.sl<ChatPageListenerBloc>()
       ..add(ListenToUserWithChatBoxEvent(
           otherUser: widget.otherUser, chatBox: widget.chatBox));
-    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        _isTextfieldFocusGained = _focusNode.hasFocus;
+      });
+    });
   }
 
   ScrollController _initializeController() {
@@ -84,6 +94,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _messageScrollController.dispose();
     super.dispose();
   }
@@ -150,9 +161,11 @@ class _ChatPageState extends State<ChatPage> {
             child: ChatTextFormField(
                 formkey: _messageFormKey,
                 textEditingController: _messageTextEditingController,
+                focusNode: _focusNode,
                 errorMessage: "please enter a message to send",
                 hintText: 'Enter a message'),
           ),
+          if (!_isTextfieldFocusGained) _buildSendImageButton(context),
           _buildSendButtonBloc(context),
         ],
       ),
@@ -177,12 +190,12 @@ class _ChatPageState extends State<ChatPage> {
         } else if (state is DoneMessageState) {
           _showGoToLastMessageButton = false;
         }
-        return _buildSendButton(context);
+        return _buildSendTextButton(context);
       },
     );
   }
 
-  Widget _buildSendButton(BuildContext context) {
+  Widget _buildSendTextButton(BuildContext context) {
     return IconButton(
         onPressed: () {
           if (_messageFormKey.currentState!.validate()) {
@@ -201,7 +214,8 @@ class _ChatPageState extends State<ChatPage> {
                 originalUser: widget.originalUser,
                 otherUser: widget.otherUser,
                 chatBoxId: widget.chatBox.id,
-                message: _createMessage(),
+                file: null,
+                message: _createTextMessage(),
               ));
               _messageTextEditingController.text = '';
             }
@@ -216,6 +230,26 @@ class _ChatPageState extends State<ChatPage> {
                 Icons.send,
                 color: Theme.of(context).colorScheme.primary.withAlpha(200),
               ));
+  }
+
+  Widget _buildSendImageButton(BuildContext context) {
+    return IconButton(
+        onPressed: () async {
+          File? imageFile = await getImage();
+          if (imageFile != null) {
+            _chatBoxBloc.add(AddMessageEvent(
+              originalUser: widget.originalUser,
+              otherUser: widget.otherUser,
+              chatBoxId: widget.chatBox.id,
+              file: imageFile,
+              message: _createImageMessage(),
+            ));
+          }
+        },
+        icon: Icon(
+          Icons.image,
+          color: Theme.of(context).colorScheme.secondary.withAlpha(200),
+        ));
   }
 
   Widget _buildMessagesSection(BuildContext context, double height) {
@@ -347,12 +381,24 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  MessageEntity _createMessage() {
+  MessageEntity _createTextMessage() {
     return MessageEntity(
         senderId: widget.originalUser.id,
         date: Timestamp.now(),
-        contentType: Content.text.type,
+        contentType: Content.TEXT.type,
         content: _messageTextEditingController.text,
+        imageName: null,
+        isSeen: false,
+        isEdited: false);
+  }
+
+  MessageEntity _createImageMessage() {
+    return MessageEntity(
+        senderId: widget.originalUser.id,
+        date: Timestamp.now(),
+        contentType: Content.IMAGE.type,
+        content: '',
+        imageName: generateUniqueImageName(),
         isSeen: false,
         isEdited: false);
   }
@@ -383,7 +429,7 @@ class _ChatPageState extends State<ChatPage> {
             style: TextStyle(color: Colors.red),
           ),
         ),
-      if (isOriginalUserMessage)
+      if (isOriginalUserMessage && message.contentType == TEXT_CONTENT_TYPE)
         const PopupMenuItem<int>(
           value: 2,
           child: Text(
@@ -391,7 +437,7 @@ class _ChatPageState extends State<ChatPage> {
             style: TextStyle(color: Colors.blue),
           ),
         ),
-      if (message.contentType == Content.text.type)
+      if (message.contentType == Content.TEXT.type)
         const PopupMenuItem<int>(
           value: 3,
           child: Text('Copy Text'),

@@ -11,7 +11,7 @@ class DefaultProfilePicture extends StatelessWidget {
       child: Center(
         child: CircleAvatar(
           foregroundColor: Theme.of(context).colorScheme.primary,
-          radius: 0.06 * height,
+          radius: 0.09 * height,
           child: Center(
               child: Icon(
             Icons.person,

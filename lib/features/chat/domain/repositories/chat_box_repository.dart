@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
@@ -17,7 +18,7 @@ abstract class ChatBoxRepository extends Equatable {
   Future<Either<AppFailure, Unit>> listenToChatBox(
       String chatBoxId, StreamController<ChatBoxModel> controller);
   Future<Either<AppFailure, Unit>> addMessage(UserModel originalUser,
-      UserModel otherUser, String chatBoxId, MessageEntity message);
+      UserModel otherUser, String chatBoxId, MessageEntity message, File? file);
   Future<Either<AppFailure, Unit>> modifyMessage(
       String chatBoxId, MessageEntity oldMessage, MessageEntity newMessage);
   Future<Either<AppFailure, Unit>> deleteMessage(

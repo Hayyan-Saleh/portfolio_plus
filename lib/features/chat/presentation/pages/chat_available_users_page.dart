@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/widgets/emtpy_data_widget.dart';
+import 'package:portfolio_plus/core/widgets/failed_widget.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
@@ -71,7 +72,8 @@ class _ChatAvailableUsersPageState extends State<ChatAvailableUsersPage> {
               }
               return _getChatAvailableUsersList(context, filteredUsers);
             } else if (state is FailedUserState) {
-              return Center(child: Text(state.failure.failureMessage));
+              return FailedWidget(
+                  title: "Error", subTitle: state.failure.failureMessage);
             }
             return const Center(
               child: Text("Error Occured"),

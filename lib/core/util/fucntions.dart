@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -313,6 +314,7 @@ MessageEntity createSeenMessage({required MessageEntity message}) {
   return MessageEntity(
       senderId: message.senderId,
       date: message.date,
+      imageName: message.imageName,
       contentType: message.contentType,
       content: message.content,
       isSeen: true,
@@ -323,6 +325,7 @@ MessageEntity createEditedMessage(
     {required MessageEntity message, required String newData}) {
   return MessageEntity(
       senderId: message.senderId,
+      imageName: message.imageName,
       date: message.date,
       contentType: message.contentType,
       content: newData,
@@ -366,26 +369,59 @@ Future<String?> getUserFCM() async {
 }
 
 void showToastMessage(BuildContext context, String title, String? subTitle) {
-  toastification.show(
-    context: context,
-    type: ToastificationType.success,
-    style: ToastificationStyle.flat,
-    autoCloseDuration: const Duration(seconds: 5),
-    title: Text(title),
-    alignment: Alignment.bottomCenter,
-    animationDuration: const Duration(milliseconds: 300),
-    primaryColor: Theme.of(context).colorScheme.onPrimary,
-    backgroundColor: Theme.of(context).colorScheme.primary,
-    foregroundColor: Theme.of(context).colorScheme.background,
-    borderRadius: BorderRadius.circular(12),
-    progressBarTheme: ProgressIndicatorThemeData(
-        linearTrackColor: Theme.of(context).colorScheme.onPrimary,
-        color: Theme.of(context).colorScheme.primary.withAlpha(100)),
-    showProgressBar: true,
-    closeButtonShowType: CloseButtonShowType.onHover,
-    closeOnClick: false,
-    pauseOnHover: true,
-    dragToClose: true,
-    applyBlurEffect: true,
-  );
+  if (subTitle != null) {
+    toastification.show(
+      context: context,
+      type: ToastificationType.success,
+      style: ToastificationStyle.flat,
+      autoCloseDuration: const Duration(seconds: 5),
+      title: Text(title),
+      description: Text(subTitle),
+      alignment: Alignment.bottomCenter,
+      animationDuration: const Duration(milliseconds: 300),
+      primaryColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.background,
+      borderRadius: BorderRadius.circular(12),
+      progressBarTheme: ProgressIndicatorThemeData(
+          linearTrackColor: Theme.of(context).colorScheme.onPrimary,
+          color: Theme.of(context).colorScheme.primary.withAlpha(100)),
+      showProgressBar: true,
+      closeButtonShowType: CloseButtonShowType.onHover,
+      closeOnClick: false,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
+  } else {
+    toastification.show(
+      context: context,
+      type: ToastificationType.success,
+      style: ToastificationStyle.flat,
+      autoCloseDuration: const Duration(seconds: 5),
+      title: Text(title),
+      alignment: Alignment.bottomCenter,
+      animationDuration: const Duration(milliseconds: 300),
+      primaryColor: Theme.of(context).colorScheme.onPrimary,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      foregroundColor: Theme.of(context).colorScheme.background,
+      borderRadius: BorderRadius.circular(12),
+      progressBarTheme: ProgressIndicatorThemeData(
+          linearTrackColor: Theme.of(context).colorScheme.onPrimary,
+          color: Theme.of(context).colorScheme.primary.withAlpha(100)),
+      showProgressBar: true,
+      closeButtonShowType: CloseButtonShowType.onHover,
+      closeOnClick: false,
+      pauseOnHover: true,
+      dragToClose: true,
+      applyBlurEffect: true,
+    );
+  }
+}
+
+String generateUniqueImageName() {
+  var timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+  var randomString = String.fromCharCodes(
+      List.generate(5, (index) => Random().nextInt(33) + 89));
+  return '$timestamp-$randomString';
 }

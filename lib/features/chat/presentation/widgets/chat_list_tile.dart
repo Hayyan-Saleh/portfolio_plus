@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio_plus/core/constants/strings.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/widgets/custom_cached_network_image.dart';
 import 'package:portfolio_plus/core/widgets/default_profile_picture.dart';
@@ -61,7 +62,7 @@ class ChatListTile extends StatelessWidget {
                   ),
                   chatBox.lastMessage != null
                       ? Text(
-                          "${chatBox.lastMessage!.senderId == user.id ? getFirstName(user.userName!) : "You "}: ${chatBox.lastMessage!.content}",
+                          "${chatBox.lastMessage!.senderId == user.id ? getFirstName(user.userName!) : "You "}: ${_getMessageContent()}",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.secondary,
@@ -114,5 +115,11 @@ class ChatListTile extends StatelessWidget {
         )
       ],
     );
+  }
+
+  String _getMessageContent() {
+    return chatBox.lastMessage!.contentType == IMAGE_CONTENT_TYPE
+        ? "Picture"
+        : chatBox.lastMessage!.content;
   }
 }

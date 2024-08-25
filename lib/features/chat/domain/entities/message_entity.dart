@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 
 class MessageEntity extends Equatable {
   final String senderId;
+  final String? imageName;
   final String contentType;
   final String content;
   final bool isSeen;
@@ -15,9 +16,10 @@ class MessageEntity extends Equatable {
       required this.contentType,
       required this.content,
       required this.isSeen,
-      required this.isEdited});
+      required this.isEdited,
+      required this.imageName});
 
   @override
   List<Object?> get props =>
-      [senderId, date, contentType, content, isSeen, isEdited];
+      [senderId, date, contentType, content, isSeen, isEdited, imageName];
 }

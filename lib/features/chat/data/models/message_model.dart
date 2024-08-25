@@ -7,10 +7,12 @@ class MessageModel extends MessageEntity {
       required super.contentType,
       required super.content,
       required super.isSeen,
-      required super.isEdited});
+      required super.isEdited,
+      required super.imageName});
   factory MessageModel.fromJson(Map<String, dynamic> messageMap) {
     return MessageModel(
         senderId: messageMap['senderId'],
+        imageName: messageMap['imageName'],
         date: messageMap['date'],
         contentType: messageMap['contentType'],
         content: messageMap['content'],
@@ -21,6 +23,7 @@ class MessageModel extends MessageEntity {
   Map<String, dynamic> toJson() {
     return {
       'senderId': senderId,
+      'imageName': imageName,
       'date': date,
       'contentType': contentType,
       'content': content,

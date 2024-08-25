@@ -12,14 +12,22 @@ class AddMessageEvent extends ChatBoxEvent {
   final UserModel otherUser;
   final MessageEntity message;
   final String chatBoxId;
+  final File? file;
   const AddMessageEvent(
       {required this.otherUser,
       required this.originalUser,
       required this.chatBoxId,
-      required this.message});
+      required this.message,
+      required this.file});
 
   @override
-  List<Object> get props => [originalUser, otherUser, chatBoxId, message];
+  List<Object> get props {
+    if (file != null) {
+      return [originalUser, otherUser, chatBoxId, message, file!];
+    } else {
+      return [originalUser, otherUser, chatBoxId, message];
+    }
+  }
 }
 
 class DeleteMessageEvent extends ChatBoxEvent {

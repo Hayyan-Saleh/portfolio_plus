@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/util/globale_variables.dart';
+import 'package:portfolio_plus/core/widgets/failed_widget.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
@@ -128,7 +129,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ],
             child: BlocBuilder<UserBloc, UserState>(
               builder: (context, state) {
-                Widget stateWidget = const Text("Not working");
+                Widget stateWidget = const FailedWidget(
+                  title: "Not working",
+                  subTitle: '',
+                );
                 if (state is LoadingUserState) {
                   stateWidget = LoadingWidget(
                     color: Theme.of(context).colorScheme.secondary,
