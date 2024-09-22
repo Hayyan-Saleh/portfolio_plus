@@ -44,7 +44,7 @@ class _ChatAvailableUsersPageState extends State<ChatAvailableUsersPage> {
         listener: (context, state) {
           if (state is CreatedChatBoxState) {
             BlocProvider.of<UserBloc>(context)
-                .add(GetOnlineUserEvent(id: widget.originalUser.id));
+                .add(GetOriginalOnlineUserEvent(id: widget.originalUser.id));
             Navigator.of(context).pop();
             Navigator.push(
               context,

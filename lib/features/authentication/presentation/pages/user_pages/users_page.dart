@@ -10,7 +10,8 @@ import 'package:portfolio_plus/features/authentication/presentation/pages/user_p
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/user_list_tile.dart';
 
 class UsersPage extends StatelessWidget {
-  const UsersPage({super.key});
+  final UserModel originalUser;
+  const UsersPage({super.key, required this.originalUser});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +44,8 @@ class UsersPage extends StatelessWidget {
             PageTransition(
                 type: PageTransitionType.bottomToTop,
                 child: OtherUserPage(
-                  user: users[index],
+                  originalUser: originalUser,
+                  otherUser: users[index],
                 )),
           ),
         );

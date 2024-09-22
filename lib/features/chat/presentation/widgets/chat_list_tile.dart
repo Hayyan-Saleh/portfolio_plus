@@ -34,15 +34,12 @@ class ChatListTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: Text(
-                      user.userName!,
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onBackground,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18),
-                    ),
+                  Text(
+                    user.userName!,
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onBackground,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18),
                   ),
                   Text(
                     user.isOffline!

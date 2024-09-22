@@ -164,7 +164,7 @@ class MessageWidget extends StatelessWidget {
               PageTransition(
                   type: PageTransitionType.fade,
                   child: ShowImagePage(
-                    message: message,
+                    pictureUrl: message.content,
                   )));
         },
         child: CustomCachedNetworkImage(

@@ -12,6 +12,7 @@ class EmtpyDataWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final double height = getHeight(context);
     return ListView(
+      physics: const NeverScrollableScrollPhysics(),
       children: [
         Padding(
           padding: EdgeInsets.all(0.05 * height),
@@ -29,10 +30,16 @@ class EmtpyDataWidget extends StatelessWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        Text(
-          subTitle,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 16),
+        const SizedBox(
+          height: 10,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            subTitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
         ),
       ],
     );

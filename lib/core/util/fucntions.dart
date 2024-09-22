@@ -6,9 +6,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:portfolio_plus/core/constants/maps.dart';
 import 'package:portfolio_plus/core/errors/errors.dart';
 import 'package:portfolio_plus/core/util/auth_enum.dart';
+import 'package:portfolio_plus/core/util/post_type_enum.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/chat/domain/entities/message_entity.dart';
 import 'package:toastification/toastification.dart';
@@ -113,7 +115,8 @@ UserModel createThemeUser({required UserModel user, required bool isDark}) {
       isDarkMode: isDark,
       phoneNumber: user.phoneNumber,
       isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
-      userFCM: user.userFCM);
+      userFCM: user.userFCM,
+      favoritePostTypes: user.favoritePostTypes);
 }
 
 void showSnackBar(BuildContext context, String content, Duration duration) {
@@ -147,79 +150,80 @@ UserModel createOnlineFetchedUser(
       isDarkMode: user.isDarkMode,
       phoneNumber: user.phoneNumber,
       isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
-      userFCM: userFCM);
+      userFCM: userFCM,
+      favoritePostTypes: user.favoritePostTypes);
 }
 
 UserModel createOpenedAppUser({required UserModel user}) {
   return UserModel(
-    id: user.id,
-    isOffline: false,
-    birthDate: user.birthDate,
-    lastSeenTime: Timestamp.now(),
-    authenticationType: user.authenticationType,
-    userName: user.userName,
-    accountName: user.accountName,
-    gender: user.gender,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    profilePictureUrl: user.profilePictureUrl,
-    userPostsIds: user.userPostsIds,
-    savedPostsIds: user.savedPostsIds,
-    chatIds: user.chatIds,
-    followersIds: user.followersIds,
-    followingIds: user.followingIds,
-    isDarkMode: user.isDarkMode,
-    isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
-    userFCM: user.userFCM,
-  );
+      id: user.id,
+      isOffline: false,
+      birthDate: user.birthDate,
+      lastSeenTime: Timestamp.now(),
+      authenticationType: user.authenticationType,
+      userName: user.userName,
+      accountName: user.accountName,
+      gender: user.gender,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePictureUrl: user.profilePictureUrl,
+      userPostsIds: user.userPostsIds,
+      savedPostsIds: user.savedPostsIds,
+      chatIds: user.chatIds,
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+      isDarkMode: user.isDarkMode,
+      isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
+      userFCM: user.userFCM,
+      favoritePostTypes: user.favoritePostTypes);
 }
 
 UserModel createClosedAppUser({required UserModel user}) {
   return UserModel(
-    id: user.id,
-    isOffline: true,
-    birthDate: user.birthDate,
-    lastSeenTime: Timestamp.now(),
-    authenticationType: user.authenticationType,
-    userName: user.userName,
-    accountName: user.accountName,
-    gender: user.gender,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    profilePictureUrl: user.profilePictureUrl,
-    userPostsIds: user.userPostsIds,
-    savedPostsIds: user.savedPostsIds,
-    chatIds: user.chatIds,
-    followersIds: user.followersIds,
-    followingIds: user.followingIds,
-    isDarkMode: user.isDarkMode,
-    isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
-    userFCM: user.userFCM,
-  );
+      id: user.id,
+      isOffline: true,
+      birthDate: user.birthDate,
+      lastSeenTime: Timestamp.now(),
+      authenticationType: user.authenticationType,
+      userName: user.userName,
+      accountName: user.accountName,
+      gender: user.gender,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePictureUrl: user.profilePictureUrl,
+      userPostsIds: user.userPostsIds,
+      savedPostsIds: user.savedPostsIds,
+      chatIds: user.chatIds,
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+      isDarkMode: user.isDarkMode,
+      isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
+      userFCM: user.userFCM,
+      favoritePostTypes: user.favoritePostTypes);
 }
 
 UserModel createNoAuthUser({required UserModel user}) {
   return UserModel(
-    id: user.id,
-    isOffline: true,
-    birthDate: user.birthDate,
-    lastSeenTime: Timestamp.now(),
-    authenticationType: AuthenticationType.noAuth.type,
-    userName: user.userName,
-    accountName: user.accountName,
-    gender: user.gender,
-    email: user.email,
-    phoneNumber: user.phoneNumber,
-    profilePictureUrl: user.profilePictureUrl,
-    userPostsIds: user.userPostsIds,
-    savedPostsIds: user.savedPostsIds,
-    chatIds: user.chatIds,
-    followersIds: user.followersIds,
-    followingIds: user.followingIds,
-    isDarkMode: user.isDarkMode,
-    isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
-    userFCM: user.userFCM,
-  );
+      id: user.id,
+      isOffline: true,
+      birthDate: user.birthDate,
+      lastSeenTime: Timestamp.now(),
+      authenticationType: AuthenticationType.noAuth.type,
+      userName: user.userName,
+      accountName: user.accountName,
+      gender: user.gender,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profilePictureUrl: user.profilePictureUrl,
+      userPostsIds: user.userPostsIds,
+      savedPostsIds: user.savedPostsIds,
+      chatIds: user.chatIds,
+      followersIds: user.followersIds,
+      followingIds: user.followingIds,
+      isDarkMode: user.isDarkMode,
+      isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
+      userFCM: user.userFCM,
+      favoritePostTypes: user.favoritePostTypes);
 }
 
 UserModel createTemporarUser({
@@ -229,26 +233,26 @@ UserModel createTemporarUser({
   required String userFCM,
 }) {
   return UserModel(
-    id: FirebaseAuth.instance.currentUser!.uid,
-    authenticationType: authenticationType.type,
-    lastSeenTime: Timestamp.now(),
-    chatIds: const [],
-    userPostsIds: const [],
-    followersIds: [],
-    followingIds: [],
-    savedPostsIds: const [],
-    isOffline: false,
-    birthDate: Timestamp.now(),
-    userName: '',
-    accountName: '',
-    email: email,
-    profilePictureUrl: '',
-    gender: '',
-    isDarkMode: false,
-    phoneNumber: '',
-    isNotificationsPermissionGranted: isNotificationsPermissionGranted,
-    userFCM: userFCM,
-  );
+      id: FirebaseAuth.instance.currentUser!.uid,
+      authenticationType: authenticationType.type,
+      lastSeenTime: Timestamp.now(),
+      chatIds: const [],
+      userPostsIds: const [],
+      followersIds: [],
+      followingIds: [],
+      savedPostsIds: const [],
+      isOffline: false,
+      birthDate: Timestamp.now(),
+      userName: '',
+      accountName: '',
+      email: email,
+      profilePictureUrl: '',
+      gender: '',
+      isDarkMode: false,
+      phoneNumber: '',
+      isNotificationsPermissionGranted: isNotificationsPermissionGranted,
+      userFCM: userFCM,
+      favoritePostTypes: []);
 }
 
 AppBar buildAppBar(BuildContext context) {
@@ -424,4 +428,101 @@ String generateUniqueImageName() {
   var randomString = String.fromCharCodes(
       List.generate(5, (index) => Random().nextInt(33) + 89));
   return '$timestamp-$randomString';
+}
+
+int getRandomVal(int start, int end) {
+  return start + Random().nextInt(end - start + 1).toInt();
+}
+
+List<String> getRandomUsersIds(List<String> usersIds, int count) {
+  List<String> randomUsersIds = [];
+  int usersIdsLength = usersIds.length;
+  for (int i = 0; i < count; i++) {
+    randomUsersIds.add(usersIds.elementAt(getRandomVal(0, usersIdsLength)));
+  }
+  return randomUsersIds;
+}
+
+List<String> getRandomUserFavoriteGenres(
+    List<String> usersFavoriteGenres, int count) {
+  List<String> randomUsersIds = [];
+  int usersIdsLength = usersFavoriteGenres.length;
+  for (int i = 0; i < count; i++) {
+    randomUsersIds
+        .add(usersFavoriteGenres.elementAt(getRandomVal(0, usersIdsLength)));
+  }
+  return randomUsersIds;
+}
+
+List<String> getRandomCategoriesNames(int count) {
+  List<String> randomCategoriesNames = [];
+  int categoriesLength = PostType.values.length;
+  List<String> categoriesNames =
+      PostType.values.map<String>((postType) => postType.type).toList();
+  for (int i = 0; i < count; i++) {
+    randomCategoriesNames
+        .add(categoriesNames.elementAt(getRandomVal(0, categoriesLength)));
+  }
+  return randomCategoriesNames;
+}
+
+List<int> distributePostsCount(int totalPostsCount, int demanderCount) {
+  Random random = Random();
+  List<int> distribution = List.filled(demanderCount, 0);
+
+  for (int i = 0; i < totalPostsCount; i++) {
+    int randomPerson = random.nextInt(demanderCount);
+    distribution[randomPerson]++;
+  }
+
+  return distribution;
+}
+
+String timeAgo(DateTime date) {
+  final Duration difference = DateTime.now().difference(date);
+
+  if (difference.inDays > 365) {
+    final int years = (difference.inDays / 365).floor();
+    return '$years year${years > 1 ? 's' : ''} ago';
+  } else if (difference.inDays > 30) {
+    final int months = (difference.inDays / 30).floor();
+    return '$months month${months > 1 ? 's' : ''} ago';
+  } else if (difference.inDays > 0) {
+    return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+  } else if (difference.inHours > 0) {
+    return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+  } else if (difference.inMinutes > 0) {
+    return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+  } else {
+    return 'just now';
+  }
+}
+
+String getPublishTime(DateTime dateTime) {
+  final now = DateTime.now();
+  final difference = now.difference(dateTime);
+
+  if (difference.inSeconds < 60) {
+    return 'just now';
+  } else if (difference.inMinutes < 60) {
+    return '${difference.inMinutes} minutes ago';
+  } else if (difference.inHours < 24) {
+    return '${difference.inHours} hours ago';
+  } else if (difference.inDays < 2) {
+    return 'yesterday';
+  } else if (difference.inDays < 7) {
+    return '${difference.inDays} days ago';
+  } else {
+    return DateFormat('yyyy-MM-dd').format(dateTime);
+  }
+}
+
+String formatLikesCount(int likes) {
+  if (likes >= 1000000) {
+    return '${(likes / 1000000).toStringAsFixed(1)}M';
+  } else if (likes >= 1000) {
+    return '${(likes / 1000).toStringAsFixed(1)}K';
+  } else {
+    return likes.toString();
+  }
 }

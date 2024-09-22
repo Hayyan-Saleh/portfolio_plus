@@ -4,7 +4,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/util/globale_variables.dart';
 import 'package:portfolio_plus/core/widgets/emtpy_data_widget.dart';
 import 'package:portfolio_plus/core/widgets/failed_widget.dart';
-import 'package:portfolio_plus/core/widgets/loading_widget.dart';
+import 'package:portfolio_plus/core/widgets/loading_list_tile.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/chat/domain/entities/chat_box_list_tile_model.dart';
@@ -13,6 +13,7 @@ import 'package:portfolio_plus/features/chat/presentation/pages/chat_available_u
 import 'package:portfolio_plus/features/chat/presentation/widgets/chat_list_tile.dart';
 import 'package:portfolio_plus/features/chat/presentation/pages/chat_page.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
+import 'package:skeletonizer/skeletonizer.dart';
 
 class ChatListPage extends StatefulWidget {
   final UserModel originalUser;
@@ -83,7 +84,7 @@ class _ChatListPageState extends State<ChatListPage> {
   Widget _buildBlocBody(BuildContext context) {
     return BlocListener<UserBloc, UserState>(
       listener: (context, state) {
-        if (state is LaodedOnlineUserState) {
+        if (state is LaodedOriginalOnlineUserState) {
           loadedOriginalUser = state.user;
         }
       },
@@ -95,9 +96,15 @@ class _ChatListPageState extends State<ChatListPage> {
                 return _buildChatListTiles();
               }
             }
-            return Center(
-              child: LoadingWidget(
-                  color: Theme.of(context).colorScheme.onBackground),
+            return Skeletonizer(
+              enabled: true,
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 15,
+                itemBuilder: (context, index) =>
+                    const LoadingListTile(height: 300),
+              ),
             );
           } else if (state is LoadedUCBModelsState) {
             ucbModel = state.ucbModel;

@@ -62,7 +62,7 @@ class _ChangeUserInfoPageState extends State<ChangeUserInfoPage> {
         Widget statePage = const SizedBox();
         if (state is LoadingUserState) {
           statePage = const LoadingPage();
-        } else if (state is LaodedOnlineUserState) {
+        } else if (state is LaodedOriginalOnlineUserState) {
           statePage = _buildPage(context, state.user);
         } else if (state is StoredOnlineUserState) {
           statePage = _buildPage(context, state.user);
@@ -432,27 +432,27 @@ class _ChangeUserInfoPageState extends State<ChangeUserInfoPage> {
 
   UserModel _createFilledInfoUser(UserModel user) {
     return UserModel(
-      accountName: accountNameEditingController.text.trim(),
-      authenticationType: user.authenticationType,
-      birthDate: birthDate,
-      chatIds: user.chatIds,
-      email: userEmailEditingController.text.trim(),
-      followersIds: user.followersIds,
-      followingIds: user.followingIds,
-      gender: selectedGender,
-      id: user.id,
-      isDarkMode: user.isDarkMode,
-      isOffline: false,
-      lastSeenTime: Timestamp.now(),
-      phoneNumber:
-          "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
-      profilePictureUrl: imageDownloadLink ?? user.profilePictureUrl,
-      savedPostsIds: user.savedPostsIds,
-      userName: userNameEditingController.text.trim(),
-      userPostsIds: user.userPostsIds,
-      isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
-      userFCM: user.userFCM,
-    );
+        accountName: accountNameEditingController.text.trim(),
+        authenticationType: user.authenticationType,
+        birthDate: birthDate,
+        chatIds: user.chatIds,
+        email: userEmailEditingController.text.trim(),
+        followersIds: user.followersIds,
+        followingIds: user.followingIds,
+        gender: selectedGender,
+        id: user.id,
+        isDarkMode: user.isDarkMode,
+        isOffline: false,
+        lastSeenTime: Timestamp.now(),
+        phoneNumber:
+            "+ ${countryCodeMap[countryCode]} ${phoneNumberEditingController.text}",
+        profilePictureUrl: imageDownloadLink ?? user.profilePictureUrl,
+        savedPostsIds: user.savedPostsIds,
+        userName: userNameEditingController.text.trim(),
+        userPostsIds: user.userPostsIds,
+        isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
+        userFCM: user.userFCM,
+        favoritePostTypes: user.favoritePostTypes);
   }
 
   void _initializeTextfields(UserModel user) {

@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="portfolio_plus"
+        android:enableOnBackInvokedCallback="true"
+        android:label="Portfolio +"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ture">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
             }
           } else if (state is LaodedOfflineUserState) {
             isDarkTheme = state.user.isDarkMode ?? false;
-          } else if (state is LaodedOnlineUserState) {
+          } else if (state is LaodedOriginalOnlineUserState) {
             isDarkTheme = state.user.isDarkMode ?? false;
           } else if (state is StoredOfflineUserState) {
             isDarkTheme = state.user.isDarkMode ?? false;

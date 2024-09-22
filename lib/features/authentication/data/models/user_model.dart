@@ -44,7 +44,8 @@ class UserModel {
   final String? userFCM;
   @HiveField(18)
   final bool? isNotificationsPermissionGranted;
-
+  @HiveField(19)
+  final List<String> favoritePostTypes;
   const UserModel(
       {required this.id,
       required this.userFCM,
@@ -64,7 +65,8 @@ class UserModel {
       required this.chatIds,
       required this.followersIds,
       required this.followingIds,
-      required this.isDarkMode});
+      required this.isDarkMode,
+      required this.favoritePostTypes});
 
   factory UserModel.fromJson(Map<String, dynamic> userMap) {
     return UserModel(
@@ -91,7 +93,10 @@ class UserModel {
             (userMap['followersIds'] as List<dynamic>).cast<String>().toList(),
         followingIds:
             (userMap['followingIds'] as List<dynamic>).cast<String>().toList(),
-        isDarkMode: userMap['isDarkMode']);
+        isDarkMode: userMap['isDarkMode'],
+        favoritePostTypes: (userMap['favoritePostTypes'] as List<dynamic>)
+            .cast<String>()
+            .toList());
   }
 
   Map<String, dynamic> toJson() {
@@ -114,7 +119,8 @@ class UserModel {
       'chatIds': chatIds,
       'followersIds': followersIds,
       'followingIds': followingIds,
-      'isDarkMode': isDarkMode
+      'isDarkMode': isDarkMode,
+      'favoritePostTypes': favoritePostTypes
     };
   }
 }

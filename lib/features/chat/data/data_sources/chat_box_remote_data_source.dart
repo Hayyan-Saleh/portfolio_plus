@@ -219,22 +219,25 @@ class ChatBoxRemoteDataSourceImpl implements ChatBoxRemoteDataSource {
   }
 
   Future<String?> _getAccessToken() async {
-    // TODO: CREATE YOUR OWN ACCESS TOCKEN TO SEND NOTIFICATIONS :
-    // final serviceAccountJson = {...}
-    // List<String> scopes = [ ... ];
-    // try {
-    // http.Client client = await auth.clientViaServiceAccount(
-    //     auth.ServiceAccountCredentials.fromJson(serviceAccountJson), scopes);
-    // auth.AccessCredentials credentials =
-    //     await auth.obtainAccessCredentialsViaServiceAccount(
-    //         auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
-    //         scopes,
-    //         client);
-    // client.close();
-    // return credentials.accessToken.data;
-    // } catch (e) {
-    //   throw OnlineException(message: e.toString());
-    // }
+    final serviceAccountJson = {}; //TODO: Add your own service credentials
+
+    List<String> scopes = []; //TODO: Add your own scopes
+
+    try {
+      http.Client client = await auth.clientViaServiceAccount(
+          auth.ServiceAccountCredentials.fromJson(serviceAccountJson), scopes);
+
+      auth.AccessCredentials credentials =
+          await auth.obtainAccessCredentialsViaServiceAccount(
+              auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
+              scopes,
+              client);
+
+      client.close();
+      return credentials.accessToken.data;
+    } catch (e) {
+      throw OnlineException(message: e.toString());
+    }
   }
 
   @override

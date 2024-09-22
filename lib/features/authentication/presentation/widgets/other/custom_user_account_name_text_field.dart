@@ -37,7 +37,8 @@ class _CustomUserAccountNameTextFieldState
           validator: (val) {
             if (val == '' || val == null) {
               errorMessage = "Please enter an account name";
-            } else {
+            }
+            if (val != null) {
               widget.userAccountNameBloc
                   .add(CheckUserAccountNameEvent(accountName: val));
             }

@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:portfolio_plus/core/network_info/network_info.dart';
 import 'package:portfolio_plus/core/util/timestamp_adapter.dart';
+import 'package:portfolio_plus/core/util/version_validator.dart';
 import 'package:portfolio_plus/features/authentication/data/data_sources/auth_remote_data_source.dart';
 import 'package:portfolio_plus/features/authentication/data/data_sources/user_local_data_source.dart';
 import 'package:portfolio_plus/features/authentication/data/data_sources/user_remote_data_source.dart';
@@ -46,6 +47,39 @@ import 'package:portfolio_plus/features/chat/domain/use_cases/modify_message_use
 import 'package:portfolio_plus/features/chat/presentation/bloc/chat_box_bloc/chat_box_bloc.dart';
 import 'package:portfolio_plus/features/chat/presentation/bloc/chat_boxes_list_bloc/chat_boxes_list_bloc.dart';
 import 'package:portfolio_plus/features/chat/presentation/bloc/chat_page_listener_bloc/chat_page_listener_bloc.dart';
+import 'package:portfolio_plus/features/post/data/data_sources/comment_remote_data_source.dart';
+import 'package:portfolio_plus/features/post/data/data_sources/posts_remote_data_source.dart';
+import 'package:portfolio_plus/features/post/data/repositories/comment_repository_impl.dart';
+import 'package:portfolio_plus/features/post/data/repositories/posts_repository_impl.dart';
+import 'package:portfolio_plus/features/post/domain/repositories/comment_repository.dart';
+import 'package:portfolio_plus/features/post/domain/repositories/post_repository.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/add_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/add_reply_to_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/delete_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/edit_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/get_comments_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/like_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/listen_to_comments_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/remove_reply_to_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/comment_use_cases/unlike_comment_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/add_post_category_to_favorites_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/add_post_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/delete_post_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/edit_post_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/get_other_users_posts_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/get_saved_posts_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/get_searched_posts_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/get_user_posts_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/like_post_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/listen_to_posts_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/remove_post_category_from_favorites_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/save_post_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/unlike_post_use_case.dart';
+import 'package:portfolio_plus/features/post/domain/use_cases/post_use_cases/unsave_post_use_case.dart';
+import 'package:portfolio_plus/features/post/presentation/bloc/comment_curd_bloc/comment_curd_bloc.dart';
+import 'package:portfolio_plus/features/post/presentation/bloc/post_search_bloc/post_search_bloc.dart';
+import 'package:portfolio_plus/features/post/presentation/bloc/posts_curd_bloc/post_curd_bloc.dart';
+import 'package:portfolio_plus/features/post/presentation/bloc/posts_paging_bloc/posts_paging_bloc.dart';
 
 final sl = GetIt.instance;
 Future<void> init() async {
@@ -144,7 +178,6 @@ Future<void> init() async {
   sl.registerLazySingleton(() => DeleteMessageUseCase(chatBoxRepository: sl()));
   sl.registerLazySingleton(() => ModifyMessageUseCase(chatBoxRepository: sl()));
   sl.registerLazySingleton(() => CreateChatBoxUseCase(chatBoxRepository: sl()));
-  // sl.registerLazySingleton(() => FetchOnlineUserUseCase(userRepository: sl()));
   sl.registerLazySingleton(() => GetChatBoxesUseCase(chatBoxRepository: sl()));
   sl.registerLazySingleton(() => ListenToUserUseCase(chatBoxRepository: sl()));
   sl.registerLazySingleton(
@@ -159,9 +192,94 @@ Future<void> init() async {
   sl.registerLazySingleton<ChatBoxRemoteDataSource>(
       () => ChatBoxRemoteDataSourceImpl());
 
+  //! features - posts
+  //* bloc
+
+  sl.registerFactory(() => PostCurdBloc(
+        addPost: sl(),
+        addPostCategoryToFavorites: sl(),
+        deletePost: sl(),
+        editPost: sl(),
+        getSavedPosts: sl(),
+        getUserPosts: sl(),
+        likePost: sl(),
+        removePostCategoryFromFavorites: sl(),
+        savePost: sl(),
+        unSavePost: sl(),
+        unlikePost: sl(),
+        fetchOnlineUser: sl(),
+      ));
+
+  sl.registerFactory(
+      () => PostSearchBloc(fetchOnlineUser: sl(), getSearchedPosts: sl()));
+  sl.registerFactory(() => PostsPagingBloc(
+      getOtherUsersPosts: sl(), listenToPosts: sl(), fetchOnlineUser: sl()));
+  sl.registerFactory(() => CommentCurdBloc(
+        addComment: sl(),
+        deleteComment: sl(),
+        editComment: sl(),
+        addReplyToComment: sl(),
+        likeComment: sl(),
+        removeReplyToComment: sl(),
+        unLikeComment: sl(),
+        getComments: sl(),
+        listenToComments: sl(),
+        fetchOnlineUser: sl(),
+      ));
+
+  //*use_cases
+
+  sl.registerLazySingleton(() => AddPostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(
+      () => AddPostCategoryToFavoritesUseCase(postRepository: sl()));
+  sl.registerLazySingleton(
+      () => RemovePostCategoryFromFavoritesUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => DeletePostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => EditPostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => GetSavedPostsUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => GetUserPostsUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => LikePostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => SavePostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => UnSavePostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => UnlikePostUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => GetSearchedPostsUseCase(postRepository: sl()));
+  sl.registerLazySingleton(
+      () => GetOtherUsersPostsUseCase(postRepository: sl()));
+  sl.registerLazySingleton(() => ListenToPostsUseCase(postRepository: sl()));
+
+  sl.registerLazySingleton(() => AddCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(() => DeleteCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(() => EditCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(
+      () => AddReplyToCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(
+      () => RemoveReplyToCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(() => LikeCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(() => UnLikeCommentUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(() => GetCommentsUseCase(commentRepository: sl()));
+  sl.registerLazySingleton(
+      () => ListenToCommentsUseCase(commentRepository: sl()));
+
+  //*repository
+
+  sl.registerLazySingleton<PostRepository>(
+      () => PostsRepositoryImpl(postRemoteDataSource: sl(), networkInfo: sl()));
+
+  sl.registerLazySingleton<CommentRepository>(() =>
+      CommentRepositoryImpl(commentRemoteDataSource: sl(), networkInfo: sl()));
+
+  //*data_sources
+  sl.registerLazySingleton<PostRemoteDataSource>(
+      () => PostRemoteDataSourceImpl());
+
+  sl.registerLazySingleton<CommentRemoteDataSource>(
+      () => CommentRemoteDataSourceImpl());
+
   //! core
   sl.registerLazySingleton<NetworkInfo>(
       () => NetworkInfoImpl(connectionChecker: sl()));
+
+  sl.registerLazySingleton<VersionValidator>(() => VerssionValidatorImpl());
 
   //!extra
   final InternetConnectionChecker connectionChecker =

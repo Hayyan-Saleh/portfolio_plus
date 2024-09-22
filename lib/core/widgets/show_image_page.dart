@@ -1,11 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:portfolio_plus/features/chat/domain/entities/message_entity.dart';
 import 'package:extended_image/extended_image.dart';
 
 class ShowImagePage extends StatelessWidget {
-  final MessageEntity message;
-  const ShowImagePage({super.key, required this.message});
+  final String pictureUrl;
+  const ShowImagePage({super.key, required this.pictureUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +31,7 @@ class ShowImagePage extends StatelessWidget {
             ),
             Center(
               child: ExtendedImage(
-                image: CachedNetworkImageProvider(message.content),
+                image: CachedNetworkImageProvider(pictureUrl),
                 fit: BoxFit.contain,
                 mode: ExtendedImageMode.gesture,
                 initGestureConfigHandler: (state) {

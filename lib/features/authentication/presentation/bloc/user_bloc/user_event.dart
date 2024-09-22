@@ -9,10 +9,18 @@ sealed class UserEvent extends Equatable {
 
 class GetOfflineUserEvent extends UserEvent {}
 
-class GetOnlineUserEvent extends UserEvent {
+class GetOtherOnlineUserEvent extends UserEvent {
   final String id;
 
-  const GetOnlineUserEvent({required this.id});
+  const GetOtherOnlineUserEvent({required this.id});
+  @override
+  List<Object> get props => [id];
+}
+
+class GetOriginalOnlineUserEvent extends UserEvent {
+  final String id;
+
+  const GetOriginalOnlineUserEvent({required this.id});
   @override
   List<Object> get props => [id];
 }
@@ -40,6 +48,7 @@ class ChangeUserDataEvent extends UserEvent {
   @override
   List<Object> get props => [user];
 }
+
 class FollowUserEvent extends UserEvent {
   final String id;
 

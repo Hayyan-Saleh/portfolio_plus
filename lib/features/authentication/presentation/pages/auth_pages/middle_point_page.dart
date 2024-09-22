@@ -5,13 +5,11 @@ import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/auth_pages/fill_info_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/home_page.dart';
-import 'package:portfolio_plus/features/chat/presentation/bloc/chat_boxes_list_bloc/chat_boxes_list_bloc.dart';
 import 'package:portfolio_plus/injection_container.dart' as di;
 
 class MiddlePointPage extends StatefulWidget {
@@ -35,10 +33,11 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<UserBloc>.value(
-      value: widget.userBloc..add(GetOnlineUserEvent(id: widget.userModel.id)),
+      value: widget.userBloc
+        ..add(GetOriginalOnlineUserEvent(id: widget.userModel.id)),
       child: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
-          if (state is LaodedOnlineUserState) {
+          if (state is LaodedOriginalOnlineUserState) {
             _handleLoadedUser(state.user);
           } else if (state is FailedUserState) {
             if (state.failure.failureMessage == NO_USER_ONLINE_FETCH_ERROR) {
@@ -78,10 +77,8 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
         MaterialPageRoute(
             builder: (context) => HomePage(
                   initialNavbarIndex: 0,
-                  chatBoxesListBloc: di.sl<ChatBoxesListBloc>(),
                   userAccountNameBloc: di.sl<UserAccountNameBloc>(),
                   userProfilePictureBloc: di.sl<UserProfilePictureBloc>(),
-                  searchUsersBloc: di.sl<SearchUsersBloc>(),
                   user: authenticatedFetchedUser,
                   authBloc: widget.authBloc,
                   userBloc: widget.userBloc,
