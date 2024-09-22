@@ -12,7 +12,6 @@ import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
@@ -23,7 +22,6 @@ import 'package:portfolio_plus/features/authentication/presentation/widgets/othe
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/number_text_form_field.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_button.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/sign_in_up_widgets/custom_text_form_field.dart';
-import 'package:portfolio_plus/injection_container.dart' as di;
 
 class FillInfoPage extends StatefulWidget {
   final UserModel userModel;
@@ -80,7 +78,7 @@ class _FillInfoPageState extends State<FillInfoPage> {
           double width = MediaQuery.of(context).size.width;
           Widget stateWidget =
               LoadingWidget(color: Theme.of(context).colorScheme.secondary);
-          if (state is LaodedOnlineUserState) {
+          if (state is LaodedOriginalOnlineUserState) {
             stateWidget = _buildBody(context, state.user, height, width,
                 widget.userProfilePictureBloc);
           } else if (state is StoredOnlineUserState) {
@@ -425,12 +423,14 @@ class _FillInfoPageState extends State<FillInfoPage> {
   }
 
   void _goToHomeScreenOnTap() {
-    if (userNameFormKey.currentState!.validate() &&
-        accountNameFormKey.currentState!.validate() &&
-        selectedGender != null &&
-        birthDate != null &&
-        countryCode != null &&
-        phoneNumberFormKey.currentState!.validate()) {
+    final bool? res = userNameFormKey.currentState?.validate();
+    if (res ??
+        true &&
+            accountNameFormKey.currentState!.validate() &&
+            selectedGender != null &&
+            birthDate != null &&
+            countryCode != null &&
+            phoneNumberFormKey.currentState!.validate()) {
       final createdUser = _createFilledInfoUser();
       widget.userBloc.add(StoreOnlineUserEvent(user: createdUser));
       Navigator.pushAndRemoveUntil(
@@ -440,10 +440,10 @@ class _FillInfoPageState extends State<FillInfoPage> {
           child: HomePage(
               userAccountNameBloc: widget.userAccountNameBloc,
               userProfilePictureBloc: widget.userProfilePictureBloc,
-              searchUsersBloc: di.sl<SearchUsersBloc>(),
               userBloc: widget.userBloc,
               authBloc: widget.authBloc,
-              user: createdUser),
+              user: createdUser,
+              initialNavbarIndex: 0),
         ),
         (route) => false,
       );
@@ -472,6 +472,10 @@ class _FillInfoPageState extends State<FillInfoPage> {
         profilePictureUrl: imageDownloadLink,
         savedPostsIds: [],
         userName: userNameEditingController.text.trim(),
-        userPostsIds: []);
+        userPostsIds: [],
+        isNotificationsPermissionGranted:
+            widget.userModel.isNotificationsPermissionGranted,
+        userFCM: widget.userModel.userFCM,
+        favoritePostTypes: []);
   }
 }

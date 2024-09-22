@@ -1,27 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:portfolio_plus/core/widgets/custom_cached_network_image.dart';
 import 'package:portfolio_plus/core/widgets/default_profile_picture.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
-import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/other_user_page.dart';
 
 class UserListTile extends StatelessWidget {
   final UserModel user;
-  const UserListTile({super.key, required this.user});
+  final Function() onPressed;
+  const UserListTile({super.key, required this.onPressed, required this.user});
 
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
     if (user.accountName != null) {
       return ListTile(
-          onTap: () => Navigator.push(
-                context,
-                PageTransition(
-                    type: PageTransitionType.bottomToTop,
-                    child: OtherUserPage(
-                      user: user,
-                    )),
-              ),
+          onTap: () => onPressed(),
           title: Text(
             user.userName!,
             style: TextStyle(

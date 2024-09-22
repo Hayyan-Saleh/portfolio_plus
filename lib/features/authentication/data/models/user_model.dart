@@ -40,9 +40,16 @@ class UserModel {
   final List<String> followersIds;
   @HiveField(16)
   final List<String> followingIds;
-
+  @HiveField(17)
+  final String? userFCM;
+  @HiveField(18)
+  final bool? isNotificationsPermissionGranted;
+  @HiveField(19)
+  final List<String> favoritePostTypes;
   const UserModel(
       {required this.id,
+      required this.userFCM,
+      required this.isNotificationsPermissionGranted,
       required this.isOffline,
       required this.birthDate,
       required this.lastSeenTime,
@@ -58,10 +65,15 @@ class UserModel {
       required this.chatIds,
       required this.followersIds,
       required this.followingIds,
-      required this.isDarkMode});
+      required this.isDarkMode,
+      required this.favoritePostTypes});
+
   factory UserModel.fromJson(Map<String, dynamic> userMap) {
     return UserModel(
         id: userMap['id'],
+        userFCM: userMap['userFCM'],
+        isNotificationsPermissionGranted:
+            userMap['isNotificationsPermissionGranted'],
         isOffline: userMap['isOffline'],
         birthDate: userMap['birthDate'],
         lastSeenTime: userMap['lastSeenTime'],
@@ -81,12 +93,17 @@ class UserModel {
             (userMap['followersIds'] as List<dynamic>).cast<String>().toList(),
         followingIds:
             (userMap['followingIds'] as List<dynamic>).cast<String>().toList(),
-        isDarkMode: userMap['isDarkMode']);
+        isDarkMode: userMap['isDarkMode'],
+        favoritePostTypes: (userMap['favoritePostTypes'] as List<dynamic>)
+            .cast<String>()
+            .toList());
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'userFCM': userFCM,
+      'isNotificationsPermissionGranted': isNotificationsPermissionGranted,
       'isOffline': isOffline,
       'birthDate': birthDate,
       'lastSeenTime': lastSeenTime,
@@ -102,7 +119,8 @@ class UserModel {
       'chatIds': chatIds,
       'followersIds': followersIds,
       'followingIds': followingIds,
-      'isDarkMode': isDarkMode
+      'isDarkMode': isDarkMode,
+      'favoritePostTypes': favoritePostTypes
     };
   }
 }

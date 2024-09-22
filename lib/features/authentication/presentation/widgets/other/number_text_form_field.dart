@@ -32,6 +32,7 @@ class _NumberTextFormFieldState extends State<NumberTextFormField> {
         },
         style: TextStyle(color: Theme.of(context).colorScheme.primary),
         decoration: InputDecoration(
+            contentPadding: const EdgeInsets.all(10),
             errorStyle: const TextStyle(color: Colors.red),
             hintStyle: TextStyle(
                 color: Theme.of(context).colorScheme.primary.withAlpha(150)),

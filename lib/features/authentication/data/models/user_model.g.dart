@@ -18,6 +18,8 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
     };
     return UserModel(
       id: fields[0] as String,
+      userFCM: fields[17] as String?,
+      isNotificationsPermissionGranted: fields[18] as bool?,
       isOffline: fields[12] as bool?,
       birthDate: fields[13] as Timestamp?,
       lastSeenTime: fields[14] as Timestamp,
@@ -34,13 +36,14 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       followersIds: (fields[15] as List).cast<String>(),
       followingIds: (fields[16] as List).cast<String>(),
       isDarkMode: fields[11] as bool?,
+      favoritePostTypes: (fields[19] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(17)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -74,7 +77,13 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(15)
       ..write(obj.followersIds)
       ..writeByte(16)
-      ..write(obj.followingIds);
+      ..write(obj.followingIds)
+      ..writeByte(17)
+      ..write(obj.userFCM)
+      ..writeByte(18)
+      ..write(obj.isNotificationsPermissionGranted)
+      ..writeByte(19)
+      ..write(obj.favoritePostTypes);
   }
 
   @override

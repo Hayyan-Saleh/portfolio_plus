@@ -45,7 +45,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
             emit(LaodedOfflineUserState(user: user));
           },
         );
-      } else if (event is GetOnlineUserEvent) {
+      } else if (event is GetOriginalOnlineUserEvent) {
         emit(LoadingUserState());
         final either = await fetchOnlineUser(event.id);
         either.fold(
@@ -53,7 +53,18 @@ class UserBloc extends Bloc<UserEvent, UserState> {
             emit(FailedUserState(failure: failure));
           },
           (user) {
-            emit(LaodedOnlineUserState(user: user));
+            emit(LaodedOriginalOnlineUserState(user: user));
+          },
+        );
+      } else if (event is GetOtherOnlineUserEvent) {
+        emit(LoadingUserState());
+        final either = await fetchOnlineUser(event.id);
+        either.fold(
+          (failure) {
+            emit(FailedUserState(failure: failure));
+          },
+          (user) {
+            emit(LaodedOtherOnlineUserState(user: user));
           },
         );
       } else if (event is StoreOfflineUserEvent) {

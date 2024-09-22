@@ -16,10 +16,11 @@ class UserAccountNameBloc
         emit(UserAccountNameLoadingState());
         final either = await checkUserAccountName(event.accountName);
         either.fold(
-            (l) => emit(UserAccountNameCheckedState(
-                isVerified: false, message: l.failureMessage)),
-            (r) => emit(const UserAccountNameCheckedState(
-                isVerified: true, message: null)));
+            (failed) => emit(UserAccountNameCheckedState(
+                isVerified: false, message: failed.failureMessage)),
+            (isVerified) => emit(UserAccountNameCheckedState(
+                isVerified: isVerified,
+                message: isVerified ? null : "Please choose another name")));
       }
     }, transformer: restartable());
   }

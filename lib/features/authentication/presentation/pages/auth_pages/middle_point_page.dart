@@ -5,7 +5,6 @@ import 'package:portfolio_plus/core/util/fucntions.dart';
 import 'package:portfolio_plus/core/widgets/loading_widget.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/auth_bloc/authentication_bloc.dart';
-import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_account_name_bloc/user_account_name_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_bloc/user_bloc.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/user_profile_picture_bloc/user_profile_picture_bloc.dart';
@@ -34,10 +33,11 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<UserBloc>.value(
-      value: widget.userBloc..add(GetOnlineUserEvent(id: widget.userModel.id)),
+      value: widget.userBloc
+        ..add(GetOriginalOnlineUserEvent(id: widget.userModel.id)),
       child: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
-          if (state is LaodedOnlineUserState) {
+          if (state is LaodedOriginalOnlineUserState) {
             _handleLoadedUser(state.user);
           } else if (state is FailedUserState) {
             if (state.failure.failureMessage == NO_USER_ONLINE_FETCH_ERROR) {
@@ -61,12 +61,14 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
     );
   }
 
-  void _handleLoadedUser(UserModel user) {
+  void _handleLoadedUser(UserModel user) async {
     if (user.accountName == '') {
       _navigateToFillUserInfoPage(user: user);
     } else {
       final UserModel authenticatedFetchedUser = createOnlineFetchedUser(
-          user: user, authType: widget.userModel.authenticationType);
+          user: user,
+          authType: widget.userModel.authenticationType,
+          userFCM: user.userFCM);
       widget.userBloc.add(StoreOnlineUserEvent(user: authenticatedFetchedUser));
       widget.userBloc
           .add(StoreOfflineUserEvent(user: authenticatedFetchedUser));
@@ -74,9 +76,9 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
         context,
         MaterialPageRoute(
             builder: (context) => HomePage(
+                  initialNavbarIndex: 0,
                   userAccountNameBloc: di.sl<UserAccountNameBloc>(),
                   userProfilePictureBloc: di.sl<UserProfilePictureBloc>(),
-                  searchUsersBloc: di.sl<SearchUsersBloc>(),
                   user: authenticatedFetchedUser,
                   authBloc: widget.authBloc,
                   userBloc: widget.userBloc,
@@ -94,7 +96,9 @@ class _MiddlePointPageState extends State<MiddlePointPage> {
                 userAccountNameBloc: userAccountNameBloc,
                 userProfilePictureBloc: userPorfilePictureBloc,
                 userModel: createOnlineFetchedUser(
-                    user: user, authType: widget.userModel.authenticationType),
+                    user: user,
+                    authType: widget.userModel.authenticationType,
+                    userFCM: widget.userModel.userFCM),
                 authBloc: widget.authBloc,
                 userBloc: widget.userBloc,
               )),

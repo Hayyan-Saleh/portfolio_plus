@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:portfolio_plus/core/util/fucntions.dart';
 
 class CustomCachedNetworkImage extends StatelessWidget {
   final bool isRounded;
@@ -24,21 +23,16 @@ class CustomCachedNetworkImage extends StatelessWidget {
   Widget _buildRegularCachedImage(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(
-              color: Theme.of(context).colorScheme.primary, width: 0.5),
-          borderRadius: BorderRadius.circular(10),
-          color: Theme.of(context).colorScheme.primary.withAlpha(150),
-          image: DecorationImage(
-            image: CachedNetworkImageProvider(
-              imageUrl,
-            ),
-            alignment: Alignment.center,
-            fit: BoxFit.cover,
-            onError: (exception, stackTrace) {
-              showCustomAboutDialog(
-                  context, "Image erro", stackTrace.toString(), null, true);
-            },
-          )),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.primary, width: 0.5),
+        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context).colorScheme.primary.withAlpha(150),
+      ),
+      child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          alignment: Alignment.center,
+          fit: BoxFit.cover,
+          height: height),
     );
   }
 

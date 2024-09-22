@@ -10,7 +10,9 @@ sealed class UserState extends Equatable {
 final class UserInitial extends UserState {}
 
 class LoadingUserState extends UserState {}
+
 class LoadingFollowingUserState extends UserState {}
+
 class LaodedOfflineUserState extends UserState {
   final UserModel user;
 
@@ -19,10 +21,18 @@ class LaodedOfflineUserState extends UserState {
   List<Object> get props => [user];
 }
 
-class LaodedOnlineUserState extends UserState {
+class LaodedOriginalOnlineUserState extends UserState {
   final UserModel user;
 
-  const LaodedOnlineUserState({required this.user});
+  const LaodedOriginalOnlineUserState({required this.user});
+  @override
+  List<Object> get props => [user];
+}
+
+class LaodedOtherOnlineUserState extends UserState {
+  final UserModel user;
+
+  const LaodedOtherOnlineUserState({required this.user});
   @override
   List<Object> get props => [user];
 }

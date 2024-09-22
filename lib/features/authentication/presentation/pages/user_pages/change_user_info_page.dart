@@ -62,7 +62,7 @@ class _ChangeUserInfoPageState extends State<ChangeUserInfoPage> {
         Widget statePage = const SizedBox();
         if (state is LoadingUserState) {
           statePage = const LoadingPage();
-        } else if (state is LaodedOnlineUserState) {
+        } else if (state is LaodedOriginalOnlineUserState) {
           statePage = _buildPage(context, state.user);
         } else if (state is StoredOnlineUserState) {
           statePage = _buildPage(context, state.user);
@@ -449,7 +449,10 @@ class _ChangeUserInfoPageState extends State<ChangeUserInfoPage> {
         profilePictureUrl: imageDownloadLink ?? user.profilePictureUrl,
         savedPostsIds: user.savedPostsIds,
         userName: userNameEditingController.text.trim(),
-        userPostsIds: user.userPostsIds);
+        userPostsIds: user.userPostsIds,
+        isNotificationsPermissionGranted: user.isNotificationsPermissionGranted,
+        userFCM: user.userFCM,
+        favoritePostTypes: user.favoritePostTypes);
   }
 
   void _initializeTextfields(UserModel user) {

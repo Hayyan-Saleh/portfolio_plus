@@ -1,81 +1,244 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:portfolio_plus/core/widgets/custom_seperator.dart';
-import 'package:portfolio_plus/core/widgets/loading_widget.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:portfolio_plus/core/widgets/emtpy_data_widget.dart';
+import 'package:portfolio_plus/core/widgets/failed_widget.dart';
+import 'package:portfolio_plus/core/widgets/loading_list_tile.dart';
 import 'package:portfolio_plus/features/authentication/data/models/user_model.dart';
 import 'package:portfolio_plus/features/authentication/presentation/bloc/search_users_bloc/search_users_bloc.dart';
+import 'package:portfolio_plus/features/authentication/presentation/pages/user_pages/other_user_page.dart';
 import 'package:portfolio_plus/features/authentication/presentation/widgets/other/user_list_tile.dart';
+import 'package:portfolio_plus/features/post/domain/entities/post_entity.dart';
+import 'package:portfolio_plus/features/post/presentation/bloc/post_search_bloc/post_search_bloc.dart';
+import 'package:portfolio_plus/features/post/presentation/widgets/post_widget.dart';
+import 'package:portfolio_plus/injection_container.dart' as di;
+import 'package:skeletonizer/skeletonizer.dart';
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends StatefulWidget {
+  final UserModel originalUser;
+
+  const SearchPage({super.key, required this.originalUser});
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
   final GlobalKey<FormState> searchFormkey = GlobalKey<FormState>();
-  final TextEditingController searchTextEditingController =
-      TextEditingController();
-  SearchPage({super.key});
+
+  final TextEditingController searchTEC = TextEditingController();
+
+  bool _isUserSearchLoading = false;
+  bool _isPostSearchLoading = false;
+
+  List<UserModel>? _searchedUsers;
+  List<Post>? _searchedPosts;
+  List<UserModel>? _searchedPostsUsers;
+
+  late final SearchUsersBloc _searchUsersBloc;
+  late final PostSearchBloc _postSearchBloc;
+  @override
+  void initState() {
+    _searchUsersBloc = di.sl<SearchUsersBloc>();
+    _postSearchBloc = di.sl<PostSearchBloc>();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
     final double width = MediaQuery.of(context).size.width;
-    return ListView(
-      children: [
-        Padding(
-            padding: EdgeInsets.symmetric(
-                vertical: 0.03 * height, horizontal: 0.05 * width),
-            child: _buildSearchTextField(context)),
-        BlocBuilder<SearchUsersBloc, SearchUsersState>(
-          builder: (context, state) {
-            if (state is SearchingUsersState) {
-              return Padding(
-                padding: EdgeInsets.only(top: 0.27 * height),
-                child: LoadingWidget(
-                    color: Theme.of(context).colorScheme.onBackground),
-              );
-            } else if (state is SearchedUsersState) {
-              return _buildResultWidget(context, state.users, height);
-            } else if (state is FailedSearchUsersState) {
-              return Center(
-                child: Text(
-                  state.message,
-                  style: TextStyle(
-                      color: Theme.of(context).colorScheme.onBackground),
-                ),
-              );
-            }
-            return const SizedBox();
-          },
-        ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<SearchUsersBloc>(create: (context) => _searchUsersBloc),
+        BlocProvider<PostSearchBloc>(create: (context) => _postSearchBloc),
       ],
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<SearchUsersBloc, SearchUsersState>(
+            listener: (context, state) {
+              if (state is SearchingUsersState) {
+                _isUserSearchLoading = true;
+              } else if (state is SearchedUsersState) {
+                _isUserSearchLoading = false;
+                _searchedUsers = state.users;
+              }
+            },
+          ),
+          BlocListener<PostSearchBloc, PostSearchState>(
+              listener: (context, state) {
+            if (state is SearchingPostsState) {
+              _isPostSearchLoading = true;
+            } else if (state is SearchedPostsState) {
+              _isPostSearchLoading = false;
+              _searchedPosts = state.posts;
+              _searchedPostsUsers = state.users;
+            }
+          })
+        ],
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: 0.03 * height, horizontal: 0.05 * width),
+                child: _buildSearchTextField(context)),
+            DefaultTabController(
+                length: 2,
+                initialIndex: 0,
+                child: Column(children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 0.05 * width, vertical: 0.01 * height),
+                    child: TabBar(
+                        indicatorColor: Theme.of(context).colorScheme.secondary,
+                        indicator: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .secondary
+                              .withAlpha(50),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        tabs: [
+                          Tab(
+                            icon: Icon(
+                              Icons.person_search_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            child: Text(
+                              "Users",
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary),
+                            ),
+                          ),
+                          Tab(
+                            icon: Icon(
+                              Icons.content_paste_search_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            child: Text(
+                              "Posts",
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary),
+                            ),
+                          ),
+                        ]),
+                  ),
+                  SizedBox(
+                    height: 0.6 * height,
+                    child: TabBarView(children: [
+                      _buildUserResultsBloc(height),
+                      _buildPostsResultBloc(height)
+                    ]),
+                  )
+                ]))
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildResultWidget(
-      BuildContext context, List<UserModel> users, double height) {
-    return users.isEmpty
-        ? Center(
-            child: Padding(
-            padding: EdgeInsets.only(top: 0.25 * height),
-            child: Text(
-              "No users fount",
-              style:
-                  TextStyle(color: Theme.of(context).colorScheme.onBackground),
-            ),
-          ))
-        : SizedBox(
-            height: 0.8 * height,
-            child: ListView.builder(
-              itemCount: users.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 0.02 * height),
-                    child: CustomSeperator(
-                        height: 0.005 * height, width: 0.1 * height),
-                  );
-                }
-                return UserListTile(user: users[index - 1]);
-              },
-            ),
-          );
+  Widget _buildUserResultsBloc(double height) {
+    return BlocBuilder<SearchUsersBloc, SearchUsersState>(
+      builder: (context, state) {
+        if (state is SearchUsersInitial) {
+          return const SizedBox();
+        } else if (state is FailedSearchUsersState) {
+          return FailedWidget(
+              title: "Error searching for ${searchTEC.text}",
+              subTitle: state.message);
+        }
+
+        return _buildUserResultWidget(
+            _searchedUsers, height, _isUserSearchLoading);
+      },
+    );
+  }
+
+  Widget _buildPostsResultBloc(double height) {
+    return BlocBuilder<PostSearchBloc, PostSearchState>(
+      builder: (context, state) {
+        if (state is PostSearchInitial) {
+          return const SizedBox();
+        } else if (state is FailedSearchPostsState) {
+          return FailedWidget(
+              title: "Error searching for ${searchTEC.text}",
+              subTitle: state.message);
+        }
+
+        return _buildPostsResultWidget(
+            _searchedPosts, _searchedPostsUsers, height, _isPostSearchLoading);
+      },
+    );
+  }
+
+  Widget _buildUserResultWidget(
+      List<UserModel>? users, double height, bool isLoading) {
+    if (!isLoading && users!.isEmpty) {
+      return Center(
+          child: SizedBox(
+              height: 0.8 * height,
+              child: const EmtpyDataWidget(
+                title: "No users found for this search!",
+                subTitle: '',
+              )));
+    }
+    return Skeletonizer(
+      enabled: isLoading,
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: isLoading ? 10 : users!.length,
+        itemBuilder: (context, index) {
+          return isLoading
+              ? LoadingListTile(height: 0.3 * height)
+              : UserListTile(
+                  user: users![index],
+                  onPressed: () => Navigator.push(
+                    context,
+                    PageTransition(
+                        type: PageTransitionType.bottomToTop,
+                        child: OtherUserPage(
+                          originalUser: widget.originalUser,
+                          otherUser: users[index],
+                        )),
+                  ),
+                );
+        },
+      ),
+    );
+  }
+
+  Widget _buildPostsResultWidget(List<Post>? posts, List<UserModel>? users,
+      double height, bool isLoading) {
+    if (!isLoading && posts!.isEmpty) {
+      return Center(
+          child: SizedBox(
+              height: 0.8 * height,
+              child: const EmtpyDataWidget(
+                title: "No Posts found for this search!",
+                subTitle: '',
+              )));
+    }
+    return Skeletonizer(
+      enabled: isLoading,
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const BouncingScrollPhysics(),
+        itemCount: isLoading ? 10 : posts!.length,
+        itemBuilder: (context, index) {
+          return isLoading
+              ? LoadingPostWidget(height: 0.5 * height)
+              : PostWidget(
+                  postUser: users![index],
+                  post: posts![index],
+                  isOriginalUserPost:
+                      widget.originalUser.id == posts[index].userId,
+                  originalUser: widget.originalUser,
+                  height: 0.5 * height,
+                );
+        },
+      ),
+    );
   }
 
   Widget _buildSearchTextField(BuildContext context) {
@@ -83,17 +246,19 @@ class SearchPage extends StatelessWidget {
         key: searchFormkey,
         onChanged: () {
           if (searchFormkey.currentState!.validate()) {
-            BlocProvider.of<SearchUsersBloc>(context).add(GetSearchedUsersEvent(
-                name: searchTextEditingController.text.trim()));
+            _searchUsersBloc
+                .add(GetSearchedUsersEvent(name: searchTEC.text.trim()));
+            _postSearchBloc
+                .add(GetSearchedPostsEvent(query: searchTEC.text.trim()));
           }
         },
         child: TextFormField(
-          controller: searchTextEditingController,
+          controller: searchTEC,
           cursorColor: Theme.of(context).colorScheme.secondary,
           autocorrect: false,
           validator: (val) {
             if (val == null || val == '') {
-              return "please enter a user name or account name";
+              return "please enter a user name,account name or project content";
             }
             return null;
           },
