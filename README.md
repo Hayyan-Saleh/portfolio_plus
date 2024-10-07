@@ -4,6 +4,8 @@ Portfolio Plus is a blog app built with Flutter and Dart, leveraging Firebase se
 
 ### [MediaFire apk download link ⬇️](https://www.mediafire.com/file/sn5gnmryfk2dxw2/Portfolio_%252B.apk/file)
 
+![promo](https://github.com/user-attachments/assets/b703c13c-bd44-420d-86d4-6a63f4eb351e)
+
 ## Features ✨
 
 ### 1. Authentication 🔒
